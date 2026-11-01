@@ -27,6 +27,10 @@ function fitInput() {
   input.style.overflowY = to > input.clientHeight ? "auto" : "hidden"; // past the 6-line cap
 }
 input.addEventListener("input", fitInput);
+new ResizeObserver(() => {
+  input.style.setProperty("--chip-w", `${$("target").offsetWidth}px`);
+  fitInput(); // the indent changes where lines break
+}).observe($("target"));
 const SVG = "http://www.w3.org/2000/svg";
 
 function el(tag: string, cls = "", text = ""): HTMLElement {
