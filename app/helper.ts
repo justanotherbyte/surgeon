@@ -21,6 +21,7 @@ export class Helper {
   private proc: ChildProcessWithoutNullStreams;
   private next = 1;
   private pending = new Map<number, Pending>();
+  onPush: (event: any) => void = () => {}; // unsolicited sub-app events from the daemon
 
   constructor() {
     this.proc = spawn("/usr/bin/python3", ["-m", "surgeon.daemon"], { cwd: REPO, env: cleanEnv() });
@@ -32,6 +33,7 @@ export class Helper {
     readline.createInterface({ input: this.proc.stdout }).on("line", (line) => {
       let msg: any;
       try { msg = JSON.parse(line); } catch { return; }
+      if (msg.push) return this.onPush(msg.push);
       const p = this.pending.get(msg.id);
       if (!p) return;
       if (msg.event) return p.onEvent?.(msg.event);

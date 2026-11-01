@@ -72,6 +72,8 @@
   /* Route families: how Surgeon acts. */
   --violet-400: oklch(0.72 0.13 295);
   --violet-600: oklch(0.52 0.15 295);
+  --magenta-400: oklch(0.74 0.14 340);
+  --magenta-600: oklch(0.52 0.16 340);
   --amber-400: oklch(0.8 0.14 75);
   --amber-600: oklch(0.6 0.13 65);
   --red-400: oklch(0.7 0.17 25);
@@ -117,6 +119,9 @@
   --route-command-fill: light-dark(oklch(0.52 0.15 295 / 0.1), oklch(0.72 0.13 295 / 0.16));
   --route-control: var(--ink-2);
   --route-control-fill: light-dark(oklch(0.2 0.01 250 / 0.06), oklch(1 0 0 / 0.07));
+  /* Sub-app helpers: Surgeon's own sandboxed script beside the app, the last-resort route. */
+  --route-helper: light-dark(var(--magenta-600), var(--magenta-400));
+  --route-helper-fill: light-dark(oklch(0.52 0.16 340 / 0.1), oklch(0.74 0.14 340 / 0.16));
 
   --warn: light-dark(var(--amber-600), var(--amber-400));
   --warn-fill: light-dark(oklch(0.8 0.14 75 / 0.2), oklch(0.8 0.14 75 / 0.14));

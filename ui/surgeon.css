@@ -191,6 +191,8 @@
 .route[data-route="command"] { --c: var(--route-command); --f: var(--route-command-fill); }
 .route[data-route="control"] { --c: var(--route-control); --f: var(--route-control-fill); }
 .route[data-route="control"]::before { background: none; border: 1.25px solid currentColor; }
+.route[data-route="helper"] { --c: var(--route-helper); --f: var(--route-helper-fill); }
+.route[data-route="helper"]::before { border-radius: 50%; }
 
 /* ---------- Target chip (what Surgeon is aimed at) ---------- */
 .target {

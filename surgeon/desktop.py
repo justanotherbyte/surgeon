@@ -3,6 +3,7 @@ import os
 import re
 import subprocess
 import time
+from urllib.parse import unquote
 
 import gi
 
@@ -36,6 +37,10 @@ def xprop(xid, *props):
                          capture_output=True, text=True, timeout=5).stdout
     result = {}
     for line in out.splitlines():
+        window = re.match(r"^(\w+): window id # (0x[0-9a-f]+)", line)  # WINDOW-typed properties
+        if window:
+            result[window.group(1)] = window.group(2)
+            continue
         if " = " not in line:
             continue
         key, value = line.split(" = ", 1)
@@ -66,10 +71,24 @@ def client_xids():
     return re.findall(r"0x[0-9a-f]+", out)
 
 
+def window_geometry(xid):
+    """Visible window bounds on screen, without GTK's client-side shadow margins."""
+    out = subprocess.run(["xwininfo", "-id", str(xid)], capture_output=True, text=True, timeout=5).stdout
+    nums = {k: int(v) for k, v in re.findall(r"(Absolute upper-left X|Absolute upper-left Y|Width|Height):\s+(-?\d+)", out)}
+    if len(nums) < 4:
+        return None
+    left = right = top = bottom = 0
+    frame = xprop(xid, "_GTK_FRAME_EXTENTS").get("_GTK_FRAME_EXTENTS")
+    if isinstance(frame, str) and frame.count(",") == 3:
+        left, right, top, bottom = (int(v) for v in frame.split(","))
+    return {"x": nums["Absolute upper-left X"] + left, "y": nums["Absolute upper-left Y"] + top,
+            "width": nums["Width"] - left - right, "height": nums["Height"] - top - bottom}
+
+
 def identity(xid):
     """Who owns this window. Window properties first, because AT-SPI names and PIDs lie."""
     p = xprop(xid, "_GTK_APPLICATION_ID", "_GTK_UNIQUE_BUS_NAME", "_GTK_APPLICATION_OBJECT_PATH",
-              "_GTK_WINDOW_OBJECT_PATH", "_NET_WM_PID", "WM_CLASS", "_NET_WM_NAME")
+              "_GTK_WINDOW_OBJECT_PATH", "_NET_WM_PID", "WM_CLASS", "_NET_WM_NAME", "WM_TRANSIENT_FOR")
     if not p:
         raise SurgeonError(f"Window {xid} is gone.")
     pid = p.get("_NET_WM_PID") if isinstance(p.get("_NET_WM_PID"), int) else None
@@ -94,8 +113,103 @@ def identity(xid):
         "pid": pid,
         "exe": exe,
         "wm_class": wm_class[-1] if isinstance(wm_class, list) else wm_class,  # class half: libreoffice-writer
+        "instance": wm_class[0] if isinstance(wm_class, list) else None,  # "Navigator" for Firefox-family browsers
         "title": p.get("_NET_WM_NAME") or "",
+        "transient": "WM_TRANSIENT_FOR" in p,  # a dialog of another window
     }
+
+
+def document_path(ident):
+    """The file the window shows: a command-line argument, resolved against the app's cwd, whose name
+    is in the window title. Failing that, the app's most recent entry in the recent-files list with
+    that name, which covers files handed to a running single-instance app over D-Bus."""
+    pid, title = ident.get("pid"), ident.get("title") or ""
+    try:
+        args = open(f"/proc/{pid}/cmdline", "rb").read().split(b"\0")[1:]
+        cwd = os.readlink(f"/proc/{pid}/cwd")
+    except (OSError, TypeError):
+        args, cwd = [], "/"
+    for raw in args:
+        arg = unquote(os.fsdecode(raw).removeprefix("file://"))
+        if not arg or arg.startswith("-"):
+            continue
+        path = os.path.normpath(os.path.join(cwd, os.path.expanduser(arg)))
+        if os.path.isfile(path) and os.path.basename(path) in title:
+            return path
+    return _recent_document(ident, title)
+
+
+def _recent_document(ident, title):
+    """Read locally; only the one matching path is ever used."""
+    info = desktop_entry(ident)
+    app_name = info.get_name() if info else None
+    recent = GLib.BookmarkFile()
+    try:
+        recent.load_from_file(os.path.join(GLib.get_user_data_dir(), "recently-used.xbel"))
+    except GLib.Error:
+        return None
+    best = None
+    for uri in recent.get_uris():
+        if not uri.startswith("file://"):
+            continue
+        path = unquote(uri.removeprefix("file://"))
+        name = os.path.basename(path)
+        if not name or name not in title or not os.path.isfile(path):
+            continue
+        try:
+            apps = recent.get_applications(uri)
+            stamp = recent.get_visited_date_time(uri).to_unix()
+        except GLib.Error:
+            continue
+        if app_name in apps and (best is None or stamp > best[0]):
+            best = (stamp, path)
+    return best and best[1]
+
+
+def desktop_entry(ident):
+    """The app's .desktop entry: by app id, by WM_CLASS, then by StartupWMClass (flatpaks like Zen)."""
+    for name in (ident.get("app_id"), ident.get("wm_class"), (ident.get("wm_class") or "").lower()):
+        if name:
+            try:
+                info = Gio.DesktopAppInfo.new(f"{name}.desktop")
+            except TypeError:
+                info = None
+            if info:
+                return info
+    wm = (ident.get("wm_class") or "").lower()
+    return next((a for a in Gio.AppInfo.get_all()
+                 if isinstance(a, Gio.DesktopAppInfo) and (a.get_startup_wm_class() or "").lower() == wm and wm), None)
+
+
+def app_by_id(app_id):
+    try:
+        return Gio.DesktopAppInfo.new(app_id if app_id.endswith(".desktop") else f"{app_id}.desktop")
+    except TypeError:
+        return None
+
+
+def list_apps(query):
+    """Installed apps whose name, id or keywords contain query: [{id, name, wm_class}]."""
+    q = query.lower()
+    out = []
+    for a in Gio.AppInfo.get_all():
+        if not isinstance(a, Gio.DesktopAppInfo) or a.get_nodisplay():
+            continue
+        text = " ".join([a.get_id() or "", a.get_name() or "", *(a.get_keywords() or [])]).lower()
+        if q in text:
+            out.append({"id": (a.get_id() or "").removesuffix(".desktop"), "name": a.get_name(),
+                        "wm_class": a.get_startup_wm_class()})
+    return out[:30]
+
+
+FIELD_CODES = {"%u", "%U", "%f", "%F", "%i", "%c", "%k", "@@u", "@@", "@@U", "--file-forwarding"}
+
+
+def launch_argv(info, args):
+    """argv from a .desktop Exec line, without its field codes (and flatpak's file-forwarding
+    markers), with args appended. No shell is involved."""
+    ok, argv = GLib.shell_parse_argv(info.get_commandline())
+    return [a for a in argv if a not in FIELD_CODES] + list(args)
 
 
 def same_app(ident, target):
@@ -319,6 +433,26 @@ def gtk_actions(ident):
     return out
 
 
+def dbus_names(ident):
+    """Well-known D-Bus names the app's process owns, other than its GApplication id (rank 1's bus)."""
+    if not ident["pid"]:
+        return []
+    proxy = "org.freedesktop.DBus"
+    names = bus().call_sync(proxy, "/org/freedesktop/DBus", proxy, "ListNames", None, None, 0, 3000, None).unpack()[0]
+    out = []
+    for name in names:
+        if name.startswith(":") or name in (ident["app_id"], proxy):
+            continue
+        try:
+            pid = bus().call_sync(proxy, "/org/freedesktop/DBus", proxy, "GetConnectionUnixProcessID",
+                                  GLib.Variant("(s)", (name,)), None, 0, 1000, None).unpack()[0]
+        except GLib.Error:
+            continue
+        if pid == ident["pid"]:
+            out.append(name)
+    return sorted(out)
+
+
 def gtk_state(ident, name):
     path, bare = _action_path(ident, name)
     enabled, param, state = bus().call_sync(ident["bus_name"], path, "org.gtk.Actions", "Describe",
@@ -354,6 +488,14 @@ def screenshot(xid, path):
     subprocess.run(["import", "-window", str(xid), str(path)], check=True, timeout=10,
                    capture_output=True)
     return path
+
+
+def sample(xid):
+    """A 32x32 grayscale thumbnail of a window, 1024 bytes, for change detection. The window's own
+    pixels only: Surgeon's panels over it don't show up."""
+    out = subprocess.run(["import", "-window", str(xid), "-resize", "32x32!", "-colorspace", "Gray", "-depth", "8", "gray:-"],
+                         capture_output=True, timeout=10).stdout
+    return out if len(out) == 1024 else None
 
 
 def wait(predicate, timeout, step=0.2):

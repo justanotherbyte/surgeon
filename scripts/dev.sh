@@ -4,5 +4,5 @@
 cd "$(dirname "$0")/.." || exit 1
 systemctl --user stop surgeon-dev 2>/dev/null
 exec systemd-run --user --collect --unit=surgeon-dev --working-directory="$PWD" \
-  -E DISPLAY -E XAUTHORITY -E DBUS_SESSION_BUS_ADDRESS -E XDG_RUNTIME_DIR -E PATH -E HOME \
+  -E DISPLAY -E XAUTHORITY -E DBUS_SESSION_BUS_ADDRESS -E XDG_RUNTIME_DIR -E PATH -E HOME -E XDG_DATA_DIRS \
   "$PWD/node_modules/.bin/electron" . --no-sandbox  # Ubuntu 24.04 blocks the SUID sandbox without root setup

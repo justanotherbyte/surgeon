@@ -14,6 +14,23 @@ The build has five parts:
 4. A watcher loop in the helper that arms a sub-app while its app is open and runs its steps when the trigger fires.
 5. Two new step types, `script` and `panel`, for the work the app can't do.
 
+## Status
+
+Built on Nov 1, 2026, in `surgeon/subapps.py`, `surgeon/sandbox.py` and the panel. It differs from this design in four places:
+
+- **Sandbox.** Ubuntu 24.04 sets `kernel.apparmor_restrict_unprivileged_userns = 1`, so `bwrap` fails from Surgeon's unconfined daemon ("setting up uid map: Permission denied"). It worked in testing only because T3 Code's AppArmor profile allows user namespaces. Scripts run under Landlock instead (writes denied everywhere except a temp dir) plus the seccomp filter, which now blocks every `socket()` call and the signal and ptrace syscalls.
+- **Arming.** The daemon polls `_NET_CLIENT_LIST` once a second instead of subscribing to systemd scopes, which covers apps started with or without a scope.
+- **Gate.** One Codex thread per request means each job has its own inspection log, so entries carry no request id. `describe_app` covers ranks 1 to 4, and `find_elements` covers rank 5.
+- **Toolbars.** A fifth trigger type, not in this design: `toolbar`, with up to 6 buttons that each carry steps and undo. Buttons dock inside the app window's top-right corner while it's active.
+- **Proof and reversibility.** The gate asks for ranks 1 to 5 only when the sub-app has a `script` step, following the fallback doc's point that a trigger in front of the app's own routes is not a fallback. Irreversible steps are refused only for `app_opened`. A toolbar click, a hotkey and a save are each the user's own action, and the consent view lists every "Can't undo" step.
+- **file_saved.** Polls the file's mtime each second and fires once it holds for a tick, instead of `Gio.FileMonitor`. `{document.path}` comes from the app's command line, so it misses files opened from inside the app.
+- **Watching and capture.** A `watch` trigger samples the app window and fires on change or once it settles. A `capture` step saves the window or the whole screen for a script, and `notify` shows a desktop notification. Whole-screen watching is left out because the screen includes Surgeon's own panels and notifications, so a watcher would trigger itself. Codex gets a `capture_window` tool for the target window only.
+- **Script output stays local.** `test_manifest` used to return panel text to Codex. It now returns only each panel's row and character counts, as this doc's script rules require.
+- **Title trigger, launching, files.** A `title` trigger fires once per visit when the active window's title matches a pattern for N seconds. A `launch` step opens installed apps through their `.desktop` entries with URL, path and window-flag arguments only. Scripts create files through `./out/` and `outputs_to`; Surgeon copies them into a visible folder inside home without overwriting. This relaxes "scripts are read-only" only through that copy.
+- **Not built.** The `atspi_event` trigger, the marker at the app window's corner, and restarting the daemon after a crash.
+
+The open question about Disk Usage Analyzer's folder resolved negatively: neither the title nor the tree holds the full path. The script Codex wrote reads it from `/proc/<pid>/cmdline`, which works when the app was opened on a folder.
+
 ## Where the code goes
 
 PRODUCT.md fixes the stack. The Electron main process (TypeScript) owns the overlay, global shortcuts and the Codex SDK. The Python helper (`/usr/bin/python3` with `gi`) owns AT-SPI and D-Bus.

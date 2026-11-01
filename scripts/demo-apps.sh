@@ -14,7 +14,7 @@ run() {
 }
 for app in ${@:-image writer terminal alacritty}; do
   case $app in
-    image) run eog "$(ls /usr/share/backgrounds/*.jpg | head -1)" ;;
+    image) run eog --new-instance "${IMAGE:-$(ls /usr/share/backgrounds/*.jpg | head -1)}" ;;  # never join the user's Image Viewer
     writer) run soffice -env:UserInstallation=file://$T/lo --writer $T/docs/report.odt ;;  # dismiss Tip of the Day once
     terminal) run gnome-terminal --class=SurgeonDemo ;;
     alacritty) run alacritty ;;

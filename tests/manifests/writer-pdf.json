@@ -1,6 +1,1 @@
-{"feasible":true,"summary":"Export the document as a PDF","steps":[
- {"type":"activate","label":"Press Export Directly as PDF","reversible":true,"role":"push button","name":"Export Directly as PDF","within":null},
- {"type":"wait_for","label":"Wait for the Export dialog","reversible":true,"window":"Export","timeout":5},
- {"type":"set_text","label":"Name the file","reversible":true,"role":"text","name":"","within":"Export","text":"/tmp/sgtest/docs/{stem}-{date}.pdf"},
- {"type":"confirm_if_present","label":"Press Export","reversible":false,"window":"Export","button":"Export","timeout":2}
-],"verification":[{"type":"file_created","path":"/tmp/sgtest/docs/{stem}-{date}.pdf"}],"undo":[],"routes_tried":[],"verified":false}
+{"feasible": true, "summary": "Export the document as a PDF", "steps": [{"type": "activate", "label": "Press Export Directly as PDF", "reversible": true, "role": "push button", "name": "Export Directly as PDF", "within": null}, {"type": "wait_for", "label": "Wait for the Export dialog", "reversible": true, "window": "Export", "timeout": 5}, {"type": "set_text", "label": "Name the file", "reversible": true, "role": "text", "name": "", "within": "Export", "text": "/tmp/sgtest/docs/{stem}-{date}.pdf"}, {"type": "confirm_if_present", "label": "Press Export", "reversible": false, "window": "Export", "button": "Export", "timeout": 2}], "verification": [{"type": "file_created", "path": "/tmp/sgtest/docs/{stem}-{date}.pdf"}], "undo": [], "routes_tried": [], "verified": false, "subapp": null}

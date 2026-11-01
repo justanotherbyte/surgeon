@@ -9,7 +9,8 @@
     "verification",
     "undo",
     "routes_tried",
-    "verified"
+    "verified",
+    "subapp"
   ],
   "properties": {
     "feasible": {
@@ -263,6 +264,191 @@
               }
             },
             "description": "Press a button in an optional dialog if it appears"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type",
+              "label",
+              "reversible",
+              "file",
+              "args",
+              "outputs_to"
+            ],
+            "properties": {
+              "type": {
+                "const": "script"
+              },
+              "label": {
+                "type": "string",
+                "description": "The step in plain words for the user"
+              },
+              "reversible": {
+                "type": "boolean",
+                "description": "true if the undo list reverses this step or it changes nothing lasting"
+              },
+              "file": {
+                "type": "string",
+                "description": "A file name from subapp.scripts"
+              },
+              "args": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Placeholders: {window.title}, {app.id}, {pid}, {date}, {documents}, {document.path}, {document.dir}"
+              },
+              "outputs_to": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "A folder for new files, e.g. '{document.dir}' or '{documents}'. The script writes into ./out/ and Surgeon copies those files there without overwriting anything; {created} is then the first file's path. null if it creates no files. Must be inside the home folder and not a hidden folder"
+              }
+            },
+            "description": "Sub-apps only. Runs a Python script from subapp.scripts in a sandbox: it may read files and /proc, but has no network, no sockets, no writes outside its temp dir, and no signals"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type",
+              "label",
+              "reversible",
+              "title",
+              "source"
+            ],
+            "properties": {
+              "type": {
+                "const": "panel"
+              },
+              "label": {
+                "type": "string",
+                "description": "The step in plain words for the user"
+              },
+              "reversible": {
+                "type": "boolean",
+                "description": "true if the undo list reverses this step or it changes nothing lasting"
+              },
+              "title": {
+                "type": "string"
+              },
+              "source": {
+                "type": "string",
+                "description": "The file of an earlier script step whose stdout to show"
+              }
+            },
+            "description": "Sub-apps only. Shows a script's stdout beside the app: a JSON list of strings becomes a list, anything else plain text"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type",
+              "label",
+              "reversible",
+              "source",
+              "file"
+            ],
+            "properties": {
+              "type": {
+                "const": "capture"
+              },
+              "label": {
+                "type": "string",
+                "description": "The step in plain words for the user"
+              },
+              "reversible": {
+                "type": "boolean",
+                "description": "true if the undo list reverses this step or it changes nothing lasting"
+              },
+              "source": {
+                "enum": [
+                  "window",
+                  "screen"
+                ]
+              },
+              "file": {
+                "type": "string",
+                "description": "Plain file name such as shot.png. Later script steps open it from their working directory"
+              }
+            },
+            "description": "Sub-apps only. Screenshot the app window, or the whole screen, into the run's working directory for a later script step. PIL and numpy are available to scripts"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type",
+              "label",
+              "reversible",
+              "title",
+              "source"
+            ],
+            "properties": {
+              "type": {
+                "const": "notify"
+              },
+              "label": {
+                "type": "string",
+                "description": "The step in plain words for the user"
+              },
+              "reversible": {
+                "type": "boolean",
+                "description": "true if the undo list reverses this step or it changes nothing lasting"
+              },
+              "title": {
+                "type": "string"
+              },
+              "source": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The file of an earlier script step whose stdout becomes the body, or null"
+              }
+            },
+            "description": "Sub-apps only. Show a desktop notification"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type",
+              "label",
+              "reversible",
+              "app",
+              "args"
+            ],
+            "properties": {
+              "type": {
+                "const": "launch"
+              },
+              "label": {
+                "type": "string",
+                "description": "The step in plain words for the user"
+              },
+              "reversible": {
+                "type": "boolean",
+                "description": "true if the undo list reverses this step or it changes nothing lasting"
+              },
+              "app": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Desktop id from list_apps, e.g. 'org.gnome.eog', or null for the target app's own launcher"
+              },
+              "args": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Each one an http(s) URL, a file path, or one of --new-window, --new-tab, --new-instance, --private-window. Placeholders: {created}, {document.path}, {documents}"
+              }
+            },
+            "description": "Open an installed app through its own .desktop entry, no shell. Terminal emulators are refused"
           }
         ]
       }
@@ -568,6 +754,191 @@
               }
             },
             "description": "Press a button in an optional dialog if it appears"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type",
+              "label",
+              "reversible",
+              "file",
+              "args",
+              "outputs_to"
+            ],
+            "properties": {
+              "type": {
+                "const": "script"
+              },
+              "label": {
+                "type": "string",
+                "description": "The step in plain words for the user"
+              },
+              "reversible": {
+                "type": "boolean",
+                "description": "true if the undo list reverses this step or it changes nothing lasting"
+              },
+              "file": {
+                "type": "string",
+                "description": "A file name from subapp.scripts"
+              },
+              "args": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Placeholders: {window.title}, {app.id}, {pid}, {date}, {documents}, {document.path}, {document.dir}"
+              },
+              "outputs_to": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "A folder for new files, e.g. '{document.dir}' or '{documents}'. The script writes into ./out/ and Surgeon copies those files there without overwriting anything; {created} is then the first file's path. null if it creates no files. Must be inside the home folder and not a hidden folder"
+              }
+            },
+            "description": "Sub-apps only. Runs a Python script from subapp.scripts in a sandbox: it may read files and /proc, but has no network, no sockets, no writes outside its temp dir, and no signals"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type",
+              "label",
+              "reversible",
+              "title",
+              "source"
+            ],
+            "properties": {
+              "type": {
+                "const": "panel"
+              },
+              "label": {
+                "type": "string",
+                "description": "The step in plain words for the user"
+              },
+              "reversible": {
+                "type": "boolean",
+                "description": "true if the undo list reverses this step or it changes nothing lasting"
+              },
+              "title": {
+                "type": "string"
+              },
+              "source": {
+                "type": "string",
+                "description": "The file of an earlier script step whose stdout to show"
+              }
+            },
+            "description": "Sub-apps only. Shows a script's stdout beside the app: a JSON list of strings becomes a list, anything else plain text"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type",
+              "label",
+              "reversible",
+              "source",
+              "file"
+            ],
+            "properties": {
+              "type": {
+                "const": "capture"
+              },
+              "label": {
+                "type": "string",
+                "description": "The step in plain words for the user"
+              },
+              "reversible": {
+                "type": "boolean",
+                "description": "true if the undo list reverses this step or it changes nothing lasting"
+              },
+              "source": {
+                "enum": [
+                  "window",
+                  "screen"
+                ]
+              },
+              "file": {
+                "type": "string",
+                "description": "Plain file name such as shot.png. Later script steps open it from their working directory"
+              }
+            },
+            "description": "Sub-apps only. Screenshot the app window, or the whole screen, into the run's working directory for a later script step. PIL and numpy are available to scripts"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type",
+              "label",
+              "reversible",
+              "title",
+              "source"
+            ],
+            "properties": {
+              "type": {
+                "const": "notify"
+              },
+              "label": {
+                "type": "string",
+                "description": "The step in plain words for the user"
+              },
+              "reversible": {
+                "type": "boolean",
+                "description": "true if the undo list reverses this step or it changes nothing lasting"
+              },
+              "title": {
+                "type": "string"
+              },
+              "source": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The file of an earlier script step whose stdout becomes the body, or null"
+              }
+            },
+            "description": "Sub-apps only. Show a desktop notification"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type",
+              "label",
+              "reversible",
+              "app",
+              "args"
+            ],
+            "properties": {
+              "type": {
+                "const": "launch"
+              },
+              "label": {
+                "type": "string",
+                "description": "The step in plain words for the user"
+              },
+              "reversible": {
+                "type": "boolean",
+                "description": "true if the undo list reverses this step or it changes nothing lasting"
+              },
+              "app": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Desktop id from list_apps, e.g. 'org.gnome.eog', or null for the target app's own launcher"
+              },
+              "args": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Each one an http(s) URL, a file path, or one of --new-window, --new-tab, --new-instance, --private-window. Placeholders: {created}, {document.path}, {documents}"
+              }
+            },
+            "description": "Open an installed app through its own .desktop entry, no shell. Terminal emulators are refused"
           }
         ]
       },
@@ -599,6 +970,1062 @@
     "verified": {
       "type": "boolean",
       "description": "true only if test_manifest passed for exactly these steps, verification and undo"
+    },
+    "subapp": {
+      "anyOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "trigger",
+            "reads",
+            "exhausted",
+            "scripts",
+            "buttons"
+          ],
+          "properties": {
+            "trigger": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "type",
+                "accelerator",
+                "path",
+                "watch",
+                "title"
+              ],
+              "properties": {
+                "type": {
+                  "enum": [
+                    "hotkey",
+                    "app_opened",
+                    "file_saved",
+                    "toolbar",
+                    "watch",
+                    "title"
+                  ],
+                  "description": "hotkey: run steps on a key. app_opened: run steps when the app opens. file_saved: run steps each time the file at path is saved. toolbar: show buttons beside the app, each with its own steps. watch: run steps when the app window's pixels change, or settle after changing. title: run steps when the app's active window title matches a pattern for some seconds"
+                },
+                "accelerator": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "hotkey: the key, e.g. 'Ctrl+Alt+D'. toolbar: optional key that focuses the toolbar for keyboard use. Pick keys the app doesn't use"
+                },
+                "path": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "file_saved: the file to watch, usually {document.path}"
+                },
+                "watch": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "interval",
+                        "mode"
+                      ],
+                      "properties": {
+                        "interval": {
+                          "type": "number",
+                          "description": "Seconds between samples, 2 to 60"
+                        },
+                        "mode": {
+                          "enum": [
+                            "changed",
+                            "settled"
+                          ],
+                          "description": "changed: fire when the window changes. settled: fire when it stops changing, for 'tell me when it finishes'"
+                        }
+                      }
+                    }
+                  ],
+                  "description": "watch trigger only, else null"
+                },
+                "title": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "pattern",
+                        "seconds"
+                      ],
+                      "properties": {
+                        "pattern": {
+                          "type": "string",
+                          "description": "Case-insensitive regular expression for the window title, e.g. '/ X \u2014 Zen Browser$'"
+                        },
+                        "seconds": {
+                          "type": "number",
+                          "description": "How long the title must match while the window is active, 1 to 86400. Fires once per visit"
+                        }
+                      }
+                    }
+                  ],
+                  "description": "title trigger only, else null"
+                }
+              }
+            },
+            "reads": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "What the sub-app reads, in plain words"
+            },
+            "exhausted": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "rank",
+                  "outcome",
+                  "reason"
+                ],
+                "properties": {
+                  "rank": {
+                    "type": "integer",
+                    "description": "1 to 5"
+                  },
+                  "outcome": {
+                    "enum": [
+                      "unavailable",
+                      "no_match",
+                      "unsuitable",
+                      "failed"
+                    ]
+                  },
+                  "reason": {
+                    "type": "string"
+                  }
+                }
+              },
+              "description": "Required only when a script step exists: one entry per route rank 1 to 5. Otherwise empty"
+            },
+            "scripts": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "file",
+                  "content"
+                ],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "description": "e.g. top_folders.py"
+                  },
+                  "content": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "buttons": {
+              "type": "array",
+              "description": "toolbar only, 1 to 6 buttons. Empty for other triggers",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "label",
+                  "steps",
+                  "undo"
+                ],
+                "properties": {
+                  "label": {
+                    "type": "string",
+                    "description": "Short button text, e.g. 'Shrink to 800 px'"
+                  },
+                  "steps": {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "type",
+                            "label",
+                            "reversible",
+                            "name",
+                            "param"
+                          ],
+                          "properties": {
+                            "type": {
+                              "const": "gtk_action"
+                            },
+                            "label": {
+                              "type": "string",
+                              "description": "The step in plain words for the user, e.g. 'Zoom to 200%'"
+                            },
+                            "reversible": {
+                              "type": "boolean",
+                              "description": "true if the undo list reverses this step or it changes nothing lasting"
+                            },
+                            "name": {
+                              "type": "string",
+                              "description": "'win.zoom-in' or 'app.new-window', exactly as describe_app lists it"
+                            },
+                            "param": {
+                              "type": [
+                                "number",
+                                "string",
+                                "boolean",
+                                "null"
+                              ]
+                            }
+                          },
+                          "description": "Rank 1. A GTK action over D-Bus"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "type",
+                            "label",
+                            "reversible",
+                            "name"
+                          ],
+                          "properties": {
+                            "type": {
+                              "const": "frame_action"
+                            },
+                            "label": {
+                              "type": "string",
+                              "description": "The step in plain words for the user, e.g. 'Zoom to 200%'"
+                            },
+                            "reversible": {
+                              "type": "boolean",
+                              "description": "true if the undo list reverses this step or it changes nothing lasting"
+                            },
+                            "name": {
+                              "type": "string"
+                            }
+                          },
+                          "description": "Rank 2. A GTK 4 window action on the accessible frame, e.g. 'page.zoom-in'"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "type",
+                            "label",
+                            "reversible",
+                            "argv"
+                          ],
+                          "properties": {
+                            "type": {
+                              "const": "cli"
+                            },
+                            "label": {
+                              "type": "string",
+                              "description": "The step in plain words for the user, e.g. 'Zoom to 200%'"
+                            },
+                            "reversible": {
+                              "type": "boolean",
+                              "description": "true if the undo list reverses this step or it changes nothing lasting"
+                            },
+                            "argv": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              },
+                              "minItems": 1
+                            }
+                          },
+                          "description": "Rank 4. The app's own binary, no shell. Placeholders: {xid}, {window_id}, {pid}, {date}, {time}, {documents}, {stem}"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "type",
+                            "label",
+                            "reversible",
+                            "role",
+                            "name",
+                            "within"
+                          ],
+                          "properties": {
+                            "type": {
+                              "const": "activate"
+                            },
+                            "label": {
+                              "type": "string",
+                              "description": "The step in plain words for the user, e.g. 'Zoom to 200%'"
+                            },
+                            "reversible": {
+                              "type": "boolean",
+                              "description": "true if the undo list reverses this step or it changes nothing lasting"
+                            },
+                            "role": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "within": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            }
+                          },
+                          "description": "Rank 5. Press a control by role and name. within = a window or menu name"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "type",
+                            "label",
+                            "reversible",
+                            "role",
+                            "name",
+                            "within",
+                            "text"
+                          ],
+                          "properties": {
+                            "type": {
+                              "const": "set_text"
+                            },
+                            "label": {
+                              "type": "string",
+                              "description": "The step in plain words for the user, e.g. 'Zoom to 200%'"
+                            },
+                            "reversible": {
+                              "type": "boolean",
+                              "description": "true if the undo list reverses this step or it changes nothing lasting"
+                            },
+                            "role": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "within": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "text": {
+                              "type": "string"
+                            }
+                          },
+                          "description": "Fill a text field. name may be '' for the first editable field in `within`. Placeholders: {date}, {time}, {documents}, {stem}"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "type",
+                            "label",
+                            "reversible",
+                            "window",
+                            "timeout"
+                          ],
+                          "properties": {
+                            "type": {
+                              "const": "wait_for"
+                            },
+                            "label": {
+                              "type": "string",
+                              "description": "The step in plain words for the user, e.g. 'Zoom to 200%'"
+                            },
+                            "reversible": {
+                              "type": "boolean",
+                              "description": "true if the undo list reverses this step or it changes nothing lasting"
+                            },
+                            "window": {
+                              "type": "string"
+                            },
+                            "timeout": {
+                              "type": "number"
+                            }
+                          },
+                          "description": "Wait for a window or dialog by name"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "type",
+                            "label",
+                            "reversible",
+                            "window",
+                            "button",
+                            "timeout"
+                          ],
+                          "properties": {
+                            "type": {
+                              "const": "confirm_if_present"
+                            },
+                            "label": {
+                              "type": "string",
+                              "description": "The step in plain words for the user, e.g. 'Zoom to 200%'"
+                            },
+                            "reversible": {
+                              "type": "boolean",
+                              "description": "true if the undo list reverses this step or it changes nothing lasting"
+                            },
+                            "window": {
+                              "type": "string"
+                            },
+                            "button": {
+                              "type": "string"
+                            },
+                            "timeout": {
+                              "type": "number"
+                            }
+                          },
+                          "description": "Press a button in an optional dialog if it appears"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "type",
+                            "label",
+                            "reversible",
+                            "file",
+                            "args",
+                            "outputs_to"
+                          ],
+                          "properties": {
+                            "type": {
+                              "const": "script"
+                            },
+                            "label": {
+                              "type": "string",
+                              "description": "The step in plain words for the user"
+                            },
+                            "reversible": {
+                              "type": "boolean",
+                              "description": "true if the undo list reverses this step or it changes nothing lasting"
+                            },
+                            "file": {
+                              "type": "string",
+                              "description": "A file name from subapp.scripts"
+                            },
+                            "args": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              },
+                              "description": "Placeholders: {window.title}, {app.id}, {pid}, {date}, {documents}, {document.path}, {document.dir}"
+                            },
+                            "outputs_to": {
+                              "type": [
+                                "string",
+                                "null"
+                              ],
+                              "description": "A folder for new files, e.g. '{document.dir}' or '{documents}'. The script writes into ./out/ and Surgeon copies those files there without overwriting anything; {created} is then the first file's path. null if it creates no files. Must be inside the home folder and not a hidden folder"
+                            }
+                          },
+                          "description": "Sub-apps only. Runs a Python script from subapp.scripts in a sandbox: it may read files and /proc, but has no network, no sockets, no writes outside its temp dir, and no signals"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "type",
+                            "label",
+                            "reversible",
+                            "title",
+                            "source"
+                          ],
+                          "properties": {
+                            "type": {
+                              "const": "panel"
+                            },
+                            "label": {
+                              "type": "string",
+                              "description": "The step in plain words for the user"
+                            },
+                            "reversible": {
+                              "type": "boolean",
+                              "description": "true if the undo list reverses this step or it changes nothing lasting"
+                            },
+                            "title": {
+                              "type": "string"
+                            },
+                            "source": {
+                              "type": "string",
+                              "description": "The file of an earlier script step whose stdout to show"
+                            }
+                          },
+                          "description": "Sub-apps only. Shows a script's stdout beside the app: a JSON list of strings becomes a list, anything else plain text"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "type",
+                            "label",
+                            "reversible",
+                            "source",
+                            "file"
+                          ],
+                          "properties": {
+                            "type": {
+                              "const": "capture"
+                            },
+                            "label": {
+                              "type": "string",
+                              "description": "The step in plain words for the user"
+                            },
+                            "reversible": {
+                              "type": "boolean",
+                              "description": "true if the undo list reverses this step or it changes nothing lasting"
+                            },
+                            "source": {
+                              "enum": [
+                                "window",
+                                "screen"
+                              ]
+                            },
+                            "file": {
+                              "type": "string",
+                              "description": "Plain file name such as shot.png. Later script steps open it from their working directory"
+                            }
+                          },
+                          "description": "Sub-apps only. Screenshot the app window, or the whole screen, into the run's working directory for a later script step. PIL and numpy are available to scripts"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "type",
+                            "label",
+                            "reversible",
+                            "title",
+                            "source"
+                          ],
+                          "properties": {
+                            "type": {
+                              "const": "notify"
+                            },
+                            "label": {
+                              "type": "string",
+                              "description": "The step in plain words for the user"
+                            },
+                            "reversible": {
+                              "type": "boolean",
+                              "description": "true if the undo list reverses this step or it changes nothing lasting"
+                            },
+                            "title": {
+                              "type": "string"
+                            },
+                            "source": {
+                              "type": [
+                                "string",
+                                "null"
+                              ],
+                              "description": "The file of an earlier script step whose stdout becomes the body, or null"
+                            }
+                          },
+                          "description": "Sub-apps only. Show a desktop notification"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "type",
+                            "label",
+                            "reversible",
+                            "app",
+                            "args"
+                          ],
+                          "properties": {
+                            "type": {
+                              "const": "launch"
+                            },
+                            "label": {
+                              "type": "string",
+                              "description": "The step in plain words for the user"
+                            },
+                            "reversible": {
+                              "type": "boolean",
+                              "description": "true if the undo list reverses this step or it changes nothing lasting"
+                            },
+                            "app": {
+                              "type": [
+                                "string",
+                                "null"
+                              ],
+                              "description": "Desktop id from list_apps, e.g. 'org.gnome.eog', or null for the target app's own launcher"
+                            },
+                            "args": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              },
+                              "description": "Each one an http(s) URL, a file path, or one of --new-window, --new-tab, --new-instance, --private-window. Placeholders: {created}, {document.path}, {documents}"
+                            }
+                          },
+                          "description": "Open an installed app through its own .desktop entry, no shell. Terminal emulators are refused"
+                        }
+                      ]
+                    }
+                  },
+                  "undo": {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "type",
+                            "label",
+                            "reversible",
+                            "name",
+                            "param"
+                          ],
+                          "properties": {
+                            "type": {
+                              "const": "gtk_action"
+                            },
+                            "label": {
+                              "type": "string",
+                              "description": "The step in plain words for the user, e.g. 'Zoom to 200%'"
+                            },
+                            "reversible": {
+                              "type": "boolean",
+                              "description": "true if the undo list reverses this step or it changes nothing lasting"
+                            },
+                            "name": {
+                              "type": "string",
+                              "description": "'win.zoom-in' or 'app.new-window', exactly as describe_app lists it"
+                            },
+                            "param": {
+                              "type": [
+                                "number",
+                                "string",
+                                "boolean",
+                                "null"
+                              ]
+                            }
+                          },
+                          "description": "Rank 1. A GTK action over D-Bus"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "type",
+                            "label",
+                            "reversible",
+                            "name"
+                          ],
+                          "properties": {
+                            "type": {
+                              "const": "frame_action"
+                            },
+                            "label": {
+                              "type": "string",
+                              "description": "The step in plain words for the user, e.g. 'Zoom to 200%'"
+                            },
+                            "reversible": {
+                              "type": "boolean",
+                              "description": "true if the undo list reverses this step or it changes nothing lasting"
+                            },
+                            "name": {
+                              "type": "string"
+                            }
+                          },
+                          "description": "Rank 2. A GTK 4 window action on the accessible frame, e.g. 'page.zoom-in'"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "type",
+                            "label",
+                            "reversible",
+                            "argv"
+                          ],
+                          "properties": {
+                            "type": {
+                              "const": "cli"
+                            },
+                            "label": {
+                              "type": "string",
+                              "description": "The step in plain words for the user, e.g. 'Zoom to 200%'"
+                            },
+                            "reversible": {
+                              "type": "boolean",
+                              "description": "true if the undo list reverses this step or it changes nothing lasting"
+                            },
+                            "argv": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              },
+                              "minItems": 1
+                            }
+                          },
+                          "description": "Rank 4. The app's own binary, no shell. Placeholders: {xid}, {window_id}, {pid}, {date}, {time}, {documents}, {stem}"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "type",
+                            "label",
+                            "reversible",
+                            "role",
+                            "name",
+                            "within"
+                          ],
+                          "properties": {
+                            "type": {
+                              "const": "activate"
+                            },
+                            "label": {
+                              "type": "string",
+                              "description": "The step in plain words for the user, e.g. 'Zoom to 200%'"
+                            },
+                            "reversible": {
+                              "type": "boolean",
+                              "description": "true if the undo list reverses this step or it changes nothing lasting"
+                            },
+                            "role": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "within": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            }
+                          },
+                          "description": "Rank 5. Press a control by role and name. within = a window or menu name"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "type",
+                            "label",
+                            "reversible",
+                            "role",
+                            "name",
+                            "within",
+                            "text"
+                          ],
+                          "properties": {
+                            "type": {
+                              "const": "set_text"
+                            },
+                            "label": {
+                              "type": "string",
+                              "description": "The step in plain words for the user, e.g. 'Zoom to 200%'"
+                            },
+                            "reversible": {
+                              "type": "boolean",
+                              "description": "true if the undo list reverses this step or it changes nothing lasting"
+                            },
+                            "role": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "within": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "text": {
+                              "type": "string"
+                            }
+                          },
+                          "description": "Fill a text field. name may be '' for the first editable field in `within`. Placeholders: {date}, {time}, {documents}, {stem}"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "type",
+                            "label",
+                            "reversible",
+                            "window",
+                            "timeout"
+                          ],
+                          "properties": {
+                            "type": {
+                              "const": "wait_for"
+                            },
+                            "label": {
+                              "type": "string",
+                              "description": "The step in plain words for the user, e.g. 'Zoom to 200%'"
+                            },
+                            "reversible": {
+                              "type": "boolean",
+                              "description": "true if the undo list reverses this step or it changes nothing lasting"
+                            },
+                            "window": {
+                              "type": "string"
+                            },
+                            "timeout": {
+                              "type": "number"
+                            }
+                          },
+                          "description": "Wait for a window or dialog by name"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "type",
+                            "label",
+                            "reversible",
+                            "window",
+                            "button",
+                            "timeout"
+                          ],
+                          "properties": {
+                            "type": {
+                              "const": "confirm_if_present"
+                            },
+                            "label": {
+                              "type": "string",
+                              "description": "The step in plain words for the user, e.g. 'Zoom to 200%'"
+                            },
+                            "reversible": {
+                              "type": "boolean",
+                              "description": "true if the undo list reverses this step or it changes nothing lasting"
+                            },
+                            "window": {
+                              "type": "string"
+                            },
+                            "button": {
+                              "type": "string"
+                            },
+                            "timeout": {
+                              "type": "number"
+                            }
+                          },
+                          "description": "Press a button in an optional dialog if it appears"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "type",
+                            "label",
+                            "reversible",
+                            "file",
+                            "args",
+                            "outputs_to"
+                          ],
+                          "properties": {
+                            "type": {
+                              "const": "script"
+                            },
+                            "label": {
+                              "type": "string",
+                              "description": "The step in plain words for the user"
+                            },
+                            "reversible": {
+                              "type": "boolean",
+                              "description": "true if the undo list reverses this step or it changes nothing lasting"
+                            },
+                            "file": {
+                              "type": "string",
+                              "description": "A file name from subapp.scripts"
+                            },
+                            "args": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              },
+                              "description": "Placeholders: {window.title}, {app.id}, {pid}, {date}, {documents}, {document.path}, {document.dir}"
+                            },
+                            "outputs_to": {
+                              "type": [
+                                "string",
+                                "null"
+                              ],
+                              "description": "A folder for new files, e.g. '{document.dir}' or '{documents}'. The script writes into ./out/ and Surgeon copies those files there without overwriting anything; {created} is then the first file's path. null if it creates no files. Must be inside the home folder and not a hidden folder"
+                            }
+                          },
+                          "description": "Sub-apps only. Runs a Python script from subapp.scripts in a sandbox: it may read files and /proc, but has no network, no sockets, no writes outside its temp dir, and no signals"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "type",
+                            "label",
+                            "reversible",
+                            "title",
+                            "source"
+                          ],
+                          "properties": {
+                            "type": {
+                              "const": "panel"
+                            },
+                            "label": {
+                              "type": "string",
+                              "description": "The step in plain words for the user"
+                            },
+                            "reversible": {
+                              "type": "boolean",
+                              "description": "true if the undo list reverses this step or it changes nothing lasting"
+                            },
+                            "title": {
+                              "type": "string"
+                            },
+                            "source": {
+                              "type": "string",
+                              "description": "The file of an earlier script step whose stdout to show"
+                            }
+                          },
+                          "description": "Sub-apps only. Shows a script's stdout beside the app: a JSON list of strings becomes a list, anything else plain text"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "type",
+                            "label",
+                            "reversible",
+                            "source",
+                            "file"
+                          ],
+                          "properties": {
+                            "type": {
+                              "const": "capture"
+                            },
+                            "label": {
+                              "type": "string",
+                              "description": "The step in plain words for the user"
+                            },
+                            "reversible": {
+                              "type": "boolean",
+                              "description": "true if the undo list reverses this step or it changes nothing lasting"
+                            },
+                            "source": {
+                              "enum": [
+                                "window",
+                                "screen"
+                              ]
+                            },
+                            "file": {
+                              "type": "string",
+                              "description": "Plain file name such as shot.png. Later script steps open it from their working directory"
+                            }
+                          },
+                          "description": "Sub-apps only. Screenshot the app window, or the whole screen, into the run's working directory for a later script step. PIL and numpy are available to scripts"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "type",
+                            "label",
+                            "reversible",
+                            "title",
+                            "source"
+                          ],
+                          "properties": {
+                            "type": {
+                              "const": "notify"
+                            },
+                            "label": {
+                              "type": "string",
+                              "description": "The step in plain words for the user"
+                            },
+                            "reversible": {
+                              "type": "boolean",
+                              "description": "true if the undo list reverses this step or it changes nothing lasting"
+                            },
+                            "title": {
+                              "type": "string"
+                            },
+                            "source": {
+                              "type": [
+                                "string",
+                                "null"
+                              ],
+                              "description": "The file of an earlier script step whose stdout becomes the body, or null"
+                            }
+                          },
+                          "description": "Sub-apps only. Show a desktop notification"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "type",
+                            "label",
+                            "reversible",
+                            "app",
+                            "args"
+                          ],
+                          "properties": {
+                            "type": {
+                              "const": "launch"
+                            },
+                            "label": {
+                              "type": "string",
+                              "description": "The step in plain words for the user"
+                            },
+                            "reversible": {
+                              "type": "boolean",
+                              "description": "true if the undo list reverses this step or it changes nothing lasting"
+                            },
+                            "app": {
+                              "type": [
+                                "string",
+                                "null"
+                              ],
+                              "description": "Desktop id from list_apps, e.g. 'org.gnome.eog', or null for the target app's own launcher"
+                            },
+                            "args": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              },
+                              "description": "Each one an http(s) URL, a file path, or one of --new-window, --new-tab, --new-instance, --private-window. Placeholders: {created}, {document.path}, {documents}"
+                            }
+                          },
+                          "description": "Open an installed app through its own .desktop entry, no shell. Terminal emulators are refused"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "description": "null for a normal plan. A helper that runs beside the app, only when ranks 1 to 5 can't do the request"
     }
   },
   "title": "Surgeon manifest"

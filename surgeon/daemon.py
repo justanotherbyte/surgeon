@@ -11,9 +11,12 @@ from gi.repository import Gio, GLib
 from . import desktop as d
 from . import install
 from . import manifest as m
+from . import relaunch
+from . import subapps
 
 _out = threading.Lock()
 _stop = threading.Event()
+_watcher = None
 
 
 def send(msg):
@@ -35,35 +38,45 @@ def _icon_path(info):
     return None
 
 
-def _app_info(ident):
-    for name in (ident["app_id"], ident["wm_class"], (ident["wm_class"] or "").lower()):
-        if name:
-            try:
-                info = Gio.DesktopAppInfo.new(f"{name}.desktop")
-            except TypeError:
-                info = None
-            if info:
-                return info
-    return None
-
-
 def target(xid=None):
     ident = d.identity(xid or d.active_xid())
-    info = _app_info(ident)
+    info = d.desktop_entry(ident)
     app = info.get_name() if info else (ident["wm_class"] or "App").capitalize()
     doc = re.split(r" [—-] ", ident["title"])[0].strip()
     frame = d.frame_for(ident)
     atspi_app = d.app_for(ident)
     toolkit = atspi_app.get_toolkit_name() if atspi_app else None
     nodes = sum(1 for _ in zip(range(20), d.walk(frame))) if frame else 0
+    fix = relaunch.plan(ident, toolkit, nodes, frame is not None)
     return {
         "ident": ident, "app": app, "doc": doc if doc and doc != app else "",
         "icon": _icon_path(info),
         "accessible": frame is not None,
-        "needs_relaunch": toolkit == "Chromium" and nodes < 10,
+        "needs_relaunch": fix is not None,
+        "relaunch": fix and {"kind": fix["kind"], "command": _shell(ident, fix)},
         "extensions": [{"id": e["id"], "name": e["name"], "accelerator": e["accelerator"], "manifest": e["manifest"]}
                        for e in install.extensions() if d.same_app(ident, e["target"])],
+        "subapps": [s for s in subapps.load_all() if d.same_app(ident, s["target"])],
     }
+
+
+def _shell(ident, fix):
+    try:
+        return relaunch.shell_command(ident, fix)
+    except d.SurgeonError:
+        return None
+
+
+def _relaunch(xid):
+    t = target(xid)
+    if not t["relaunch"]:
+        return {"ok": True, "message": "Surgeon can already see inside it.", "xid": t["ident"]["xid"]}
+    try:
+        result = relaunch.relaunch(t["ident"], relaunch.FIXES[t["relaunch"]["kind"]])
+    except d.SurgeonError as e:
+        result = {"ok": False, "message": str(e)}
+    result["command"] = t["relaunch"]["command"]
+    return result
 
 
 def verified(job, manifest):
@@ -98,6 +111,8 @@ def handle(req):
         return {"path": d.screenshot(req["xid"], req["path"])}
     if cmd == "undo":
         return m.undo(req["manifest"], d.identity(req["xid"]))
+    if cmd == "relaunch":
+        return _relaunch(req["xid"])
     if cmd == "stop":
         _stop.set()
         return {}
@@ -107,10 +122,24 @@ def handle(req):
         return install.uninstall(req["ext_id"])
     if cmd == "list":
         return {"extensions": install.extensions()}
+    if cmd == "subapp_check":
+        return {"reasons": subapps.gate(req["manifest"], req["job"], d.identity(req["xid"]))}
+    if cmd == "subapp_install":
+        return subapps.install(req["manifest"], req["job"], d.identity(req["xid"]), req.get("request", ""))
+    if cmd == "subapp_enable":
+        return subapps.set_enabled(req["sub_id"], req["enabled"])
+    if cmd == "subapp_remove":
+        return subapps.remove(req["sub_id"])
+    if cmd == "subapp_trigger":
+        _watcher.fire(req["sub_id"], req["xid"], req.get("button"))
+        return {}
     raise d.SurgeonError(f"Unknown command {cmd!r}.")
 
 
 def main():
+    global _watcher
+    _watcher = subapps.Watcher(lambda event: send({"push": event}))
+    _watcher.start()
     for line in sys.stdin:
         try:
             req = json.loads(line)

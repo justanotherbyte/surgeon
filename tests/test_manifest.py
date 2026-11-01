@@ -1,6 +1,7 @@
 import copy
 import json
 import unittest
+import unittest.mock
 from pathlib import Path
 
 from surgeon import desktop as d
@@ -69,3 +70,12 @@ class HashAndPlaceholderTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class XpropTest(unittest.TestCase):
+    def test_parses_strings_numbers_and_window_ids(self):
+        out = ('WM_CLASS = "dotnet", "dotnet"\n_NET_WM_PID = 42\n'
+               "WM_TRANSIENT_FOR: window id # 0x4600004\n_GTK_APPLICATION_ID:  not found.\n")
+        with unittest.mock.patch("subprocess.run", return_value=unittest.mock.Mock(stdout=out)):
+            p = d.xprop("0x1", "WM_CLASS", "_NET_WM_PID", "WM_TRANSIENT_FOR", "_GTK_APPLICATION_ID")
+        self.assertEqual(p, {"WM_CLASS": ["dotnet", "dotnet"], "_NET_WM_PID": 42, "WM_TRANSIENT_FOR": "0x4600004"})
