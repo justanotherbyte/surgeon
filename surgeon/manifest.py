@@ -66,7 +66,7 @@ def check(manifest, ident):
         _check_steps(button["steps"], button["undo"], ident, scripts, True)
 
 
-SUBAPP_ONLY = ("script", "panel", "capture", "notify")
+SUBAPP_ONLY = ("script", "panel", "capture", "notify", "agent")
 
 
 def _check_steps(steps, undo_steps, ident, scripts, in_subapp):
@@ -84,7 +84,7 @@ def _check_steps(steps, undo_steps, ident, scripts, in_subapp):
             raise SurgeonError(f"cli argv[0] must be the app's own binary ({', '.join(sorted(allowed_binaries(ident)))}),"
                                f" not {step['argv'][0]!r}.")
     if any(step["type"] in SUBAPP_ONLY for step in undo_steps):
-        raise SurgeonError("Undo can't contain script, panel, capture or notify steps.")
+        raise SurgeonError("Undo can't contain script, panel, capture, notify or agent steps.")
     seen = set()
     for step in steps:
         if step["type"] in SUBAPP_ONLY and not in_subapp:
@@ -93,8 +93,14 @@ def _check_steps(steps, undo_steps, ident, scripts, in_subapp):
             if step["file"] not in scripts:
                 raise SurgeonError(f"Script step names {step['file']!r}, which is not in subapp.scripts.")
             seen.add(step["file"])
+        if step["type"] == "agent":
+            if step["reversible"]:
+                raise SurgeonError("An agent step can't be reversible: nobody knows in advance what it will do.")
+            if not 1 <= step["max_actions"] <= MAX_AGENT_ACTIONS:
+                raise SurgeonError(f"An agent step's max_actions must be 1 to {MAX_AGENT_ACTIONS}.")
+            seen.add(step["file"])
         if step["type"] in ("panel", "notify") and step["source"] is not None and step["source"] not in seen:
-            raise SurgeonError(f"{step['type']} source {step['source']!r} must be the file of an earlier script step.")
+            raise SurgeonError(f"{step['type']} source {step['source']!r} must be the file of an earlier script or agent step.")
         if step["type"] == "capture" and (not re.fullmatch(r"[\w.-]+", step["file"]) or step["file"] in (".", "..")):
             raise SurgeonError(f"Capture file {step['file']!r} must be a plain file name.")
 
@@ -196,6 +202,9 @@ def do_step(step, ident, ctx=None):
         if step["outputs_to"]:
             ctx["created"] += deliver(_workdir(ctx), fill(step["outputs_to"], ident))
         return None
+    if kind == "agent":
+        ctx["outputs"][step["file"]] = run_agent(step, ident)
+        return None
     if kind == "launch":
         info = d.app_by_id(step["app"]) if step["app"] else d.desktop_entry(ident)
         if info is None:
@@ -281,6 +290,30 @@ def do_step(step, ident, ctx=None):
 
 
 SANDBOX = Path(__file__).with_name("sandbox.py")
+AGENT_JS = Path(__file__).parent.parent / "app" / "dist" / "agent.js"
+MAX_AGENT_ACTIONS, AGENT_TIMEOUT = 10, 240  # keep AGENT_TIMEOUT under test_manifest's tool timeout in app/job.ts
+
+
+def run_agent(step, ident):
+    """Run Codex toward the step's goal. It acts only through run_steps, which goes through check()
+    and the denylist like any plan. Returns its final message."""
+    # Electron passes its own binary; ELECTRON_RUN_AS_NODE makes it plain Node (harmless for real node).
+    node = os.environ.get("SURGEON_NODE") or shutil.which("node")
+    if not node:
+        raise SurgeonError("Can't find Node to run the agent. Start Surgeon with npm run dev.")
+    env = {**os.environ, "ELECTRON_RUN_AS_NODE": "1"}
+    try:
+        proc = subprocess.run([node, str(AGENT_JS), ident["xid"], str(step["max_actions"]), step["goal"]],
+                              capture_output=True, text=True, timeout=AGENT_TIMEOUT, env=env)
+    except subprocess.TimeoutExpired:
+        raise SurgeonError(f"The agent ran longer than {AGENT_TIMEOUT} s.")
+    try:
+        result = json.loads(proc.stdout.strip().splitlines()[-1])
+    except (ValueError, IndexError):
+        raise SurgeonError(f"The agent returned no result: {proc.stderr.strip()[-300:]}")
+    if not result.get("ok"):
+        raise SurgeonError(f"The agent didn't reach its goal: {result.get('message') or result.get('error')}")
+    return result["message"]
 
 
 LAUNCH_FLAGS = {"--new-window", "--new-tab", "--new-instance", "--private-window"}

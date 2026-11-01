@@ -449,6 +449,44 @@
               }
             },
             "description": "Open an installed app through its own .desktop entry, no shell. Terminal emulators are refused"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type",
+              "label",
+              "reversible",
+              "goal",
+              "max_actions",
+              "file"
+            ],
+            "properties": {
+              "type": {
+                "const": "agent"
+              },
+              "label": {
+                "type": "string",
+                "description": "The step in plain words for the user"
+              },
+              "reversible": {
+                "type": "boolean",
+                "description": "Always false: Surgeon can't know what the agent will do"
+              },
+              "goal": {
+                "type": "string",
+                "description": "What the agent works toward each run, in plain words the user approves, e.g. 'If the build log shows an error, open the file and line it names'"
+              },
+              "max_actions": {
+                "type": "integer",
+                "description": "How many run_steps calls the agent gets per run, 1 to 10"
+              },
+              "file": {
+                "type": "string",
+                "description": "A name for the agent's final message, e.g. 'agent.txt', so a later panel or notify step can show it as source"
+              }
+            },
+            "description": "Sub-apps only. Each run, Codex reads the app and decides which steps to run toward goal"
           }
         ]
       }
@@ -939,6 +977,44 @@
               }
             },
             "description": "Open an installed app through its own .desktop entry, no shell. Terminal emulators are refused"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type",
+              "label",
+              "reversible",
+              "goal",
+              "max_actions",
+              "file"
+            ],
+            "properties": {
+              "type": {
+                "const": "agent"
+              },
+              "label": {
+                "type": "string",
+                "description": "The step in plain words for the user"
+              },
+              "reversible": {
+                "type": "boolean",
+                "description": "Always false: Surgeon can't know what the agent will do"
+              },
+              "goal": {
+                "type": "string",
+                "description": "What the agent works toward each run, in plain words the user approves, e.g. 'If the build log shows an error, open the file and line it names'"
+              },
+              "max_actions": {
+                "type": "integer",
+                "description": "How many run_steps calls the agent gets per run, 1 to 10"
+              },
+              "file": {
+                "type": "string",
+                "description": "A name for the agent's final message, e.g. 'agent.txt', so a later panel or notify step can show it as source"
+              }
+            },
+            "description": "Sub-apps only. Each run, Codex reads the app and decides which steps to run toward goal"
           }
         ]
       },
@@ -1582,6 +1658,44 @@
                             }
                           },
                           "description": "Open an installed app through its own .desktop entry, no shell. Terminal emulators are refused"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "type",
+                            "label",
+                            "reversible",
+                            "goal",
+                            "max_actions",
+                            "file"
+                          ],
+                          "properties": {
+                            "type": {
+                              "const": "agent"
+                            },
+                            "label": {
+                              "type": "string",
+                              "description": "The step in plain words for the user"
+                            },
+                            "reversible": {
+                              "type": "boolean",
+                              "description": "Always false: Surgeon can't know what the agent will do"
+                            },
+                            "goal": {
+                              "type": "string",
+                              "description": "What the agent works toward each run, in plain words the user approves, e.g. 'If the build log shows an error, open the file and line it names'"
+                            },
+                            "max_actions": {
+                              "type": "integer",
+                              "description": "How many run_steps calls the agent gets per run, 1 to 10"
+                            },
+                            "file": {
+                              "type": "string",
+                              "description": "A name for the agent's final message, e.g. 'agent.txt', so a later panel or notify step can show it as source"
+                            }
+                          },
+                          "description": "Sub-apps only. Each run, Codex reads the app and decides which steps to run toward goal"
                         }
                       ]
                     }
@@ -2015,6 +2129,44 @@
                             }
                           },
                           "description": "Open an installed app through its own .desktop entry, no shell. Terminal emulators are refused"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "type",
+                            "label",
+                            "reversible",
+                            "goal",
+                            "max_actions",
+                            "file"
+                          ],
+                          "properties": {
+                            "type": {
+                              "const": "agent"
+                            },
+                            "label": {
+                              "type": "string",
+                              "description": "The step in plain words for the user"
+                            },
+                            "reversible": {
+                              "type": "boolean",
+                              "description": "Always false: Surgeon can't know what the agent will do"
+                            },
+                            "goal": {
+                              "type": "string",
+                              "description": "What the agent works toward each run, in plain words the user approves, e.g. 'If the build log shows an error, open the file and line it names'"
+                            },
+                            "max_actions": {
+                              "type": "integer",
+                              "description": "How many run_steps calls the agent gets per run, 1 to 10"
+                            },
+                            "file": {
+                              "type": "string",
+                              "description": "A name for the agent's final message, e.g. 'agent.txt', so a later panel or notify step can show it as source"
+                            }
+                          },
+                          "description": "Sub-apps only. Each run, Codex reads the app and decides which steps to run toward goal"
                         }
                       ]
                     }

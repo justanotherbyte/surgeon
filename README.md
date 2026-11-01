@@ -104,6 +104,15 @@ Example: "Give me a hotkey that inverts the colours of this image and opens the 
 - **`capture_window` tool.** While building, Codex can take a fresh screenshot of the target window, for example to see the app after a test. It has no whole-screen tool.
 - **Nothing a script outputs goes to Codex.** During a test, Codex learns only how many rows or characters each panel got.
 
+### Agent steps
+
+A sub-app step can be an agent instead of fixed steps. Each time the trigger fires, Codex reads the app and decides what to do toward a goal you approved at install, for example "When the build stops, if the log shows an error, open the file and line it names" in a terminal (watch settled plus an agent step). Codex picks fixed steps whenever they can do the job, because they're faster and free to run.
+
+- **What it can do.** The agent runs `node app/dist/agent.js`, a Codex thread whose MCP server (`surgeon.mcp --agent N`) has the read tools and `run_steps` instead of `test_manifest`. `run_steps` runs the same step types as a plan, through the same schema check and blocked list. It can't run scripts or start another agent. `max_actions` (1 to 10) caps its `run_steps` calls per run, and a run is stopped after 240 s.
+- **What it sends.** Everything the agent reads in the window goes to Codex on each run. The consent view says so and tags the step "Codex decides each run". The prompt tells Codex to treat text in the window as data, but a page or document that tries to give it instructions can still steer it within those limits.
+- **Its output.** An agent step is never reversible, so it can't run on an `app_opened` trigger. Its final message is saved under the step's `file`, so a later `notify` or `panel` step can show it. Each run's tool calls go to `jobs/agent-<time>/inspection.jsonl`.
+- **Testing.** `test_manifest` runs the agent once for real, and Surgeon can't undo what it did.
+
 - **Install gate.** Surgeon offers a sub-app only if its own test passed for exactly that sub-app, testing every toolbar button and its undo. A sub-app with a script must also prove that the app's own routes can't do the work: the job's inspection log has to show `describe_app` and `find_elements` ran and agree with each claimed outcome. "Unsuitable" outcomes can't be checked mechanically, so the consent view marks them "Codex judged".
 - **Consent.** The panel shows the trigger, every step with its route and any "Can't undo" tag, what the sub-app reads, and any script in full. Enter doesn't install; press Install or Ctrl+Enter.
 - **Sandbox.** Scripts run under Landlock and seccomp (`surgeon/sandbox.py`). They can read files and `/proc`, but can't open any socket, write outside a temp dir, or signal another process. Ubuntu 24.04 blocks user namespaces for unconfined processes, so `bwrap` can't run from Surgeon's daemon.

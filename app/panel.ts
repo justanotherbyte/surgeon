@@ -49,7 +49,7 @@ function setIcon(img: HTMLImageElement, path: string | null) {
 function routeOf(step: any) {
   if (["gtk_action", "frame_action", "dbus_call"].includes(step.type)) return "action";
   if (["cli", "open_uri", "launch"].includes(step.type)) return "command";
-  if (["script", "panel", "capture", "notify"].includes(step.type)) return "helper";
+  if (["script", "panel", "capture", "notify", "agent"].includes(step.type)) return "helper";
   return "control";
 }
 
@@ -62,6 +62,7 @@ function routeText(step: any) {
     case "confirm_if_present": return `confirm_if_present ${step.button}`;
     case "capture": return `capture ${step.source}`;
     case "launch": return `launch ${step.app ?? "app"}`;
+    case "agent": return `agent, up to ${step.max_actions} actions`;
     default: return step.type;
   }
 }
@@ -174,6 +175,11 @@ function renderConsent(manifest: any, record: any = null) {
         tag.dataset.tone = "warn";
         meta.append(tag);
       }
+      if (step.type === "agent") {
+        const tag = el("span", "tag", "Codex decides each run");
+        tag.dataset.tone = "warn";
+        meta.append(tag);
+      }
       if (step.type === "capture" && step.source === "screen") {
         const tag = el("span", "tag", "Sees your whole screen");
         tag.dataset.tone = "danger";
@@ -182,7 +188,7 @@ function renderConsent(manifest: any, record: any = null) {
       const chip = el("span", "route", routeText(step));
       chip.dataset.route = routeOf(step);
       meta.append(chip);
-      li.append(el("span", "", step.label), meta);
+      li.append(el("span", "", step.type === "agent" ? `${step.label}. Goal: ${step.goal}` : step.label), meta);
       steps.append(li);
     }
   };
@@ -195,6 +201,8 @@ function renderConsent(manifest: any, record: any = null) {
   const allSteps = [...manifest.steps, ...sub.buttons.flatMap((b: any) => b.steps)];
   $("consent-hint").textContent = allSteps.some((st: any) => st.type === "capture" && st.source === "screen")
     ? "Its script sees everything on your screen, including other apps. Nothing goes to Codex"
+    : allSteps.some((st: any) => st.type === "agent")
+    ? `Each run sends what Codex reads in ${target.app}'s window to Codex. It acts only through ${target.app}'s own routes, with Surgeon's blocked list`
     : sub.scripts.length
     ? "Scripts run sandboxed: no network, no sockets, no writes, no signals"
     : `Uses only ${target.app}'s own actions, controls and command line`;

@@ -1,6 +1,7 @@
-"""Codex's only way into the desktop. Seven tools scoped to one window, over MCP stdio JSON-RPC.
+"""Codex's only way into the desktop. Tools scoped to one window, over MCP stdio JSON-RPC.
 
-python3 -m surgeon.mcp --xid 0x3a00007 --job <id>
+python3 -m surgeon.mcp --xid 0x3a00007 --job <id> [--agent <max run_steps calls>]
+Building a plan gets test_manifest. An agent step at run time gets run_steps instead.
 Every call is appended to jobs/<id>/inspection.jsonl, which Codex's read-only sandbox can't write.
 """
 import argparse
@@ -22,8 +23,9 @@ MAX_TESTS = 5  # keep in step with MAX_TESTS in app/job.ts
 
 
 class Tools:
-    def __init__(self, xid, job):
+    def __init__(self, xid, job, agent=0):
         self.ident = d.identity(xid)
+        self.agent, self.actions = agent, 0
         self.log_path = m.DATA / "jobs" / job / "inspection.jsonl"
         self.log_path.parent.mkdir(parents=True, exist_ok=True)
         self.tests = 0
@@ -140,6 +142,19 @@ class Tools:
                              "text_chars": len(p["text"] or "")} for p in result.get("panels", [])]
         return {"passed": result["ok"], "attempt": self.tests, **{k: v for k, v in result.items() if k != "ok"}}
 
+    def run_steps(self, steps):
+        """Agent mode: run steps for real, with no test and no undo. Same check() and denylist as a plan."""
+        if self.actions >= self.agent:
+            return {"ok": False, "error": f"Only {self.agent} run_steps calls per run. Finish with what you have."}
+        if any(s.get("type") == "agent" for s in steps):
+            raise SurgeonError("An agent can't start another agent.")
+        self.actions += 1
+        manifest = {"feasible": True, "summary": "agent", "steps": steps, "verification": [], "undo": [],
+                    "routes_tried": [], "verified": False, "subapp": None}
+        result = m.run(manifest, self._ident())
+        self.log({"tool": "run_steps", "steps": steps, "ok": result["ok"], "error": result["error"]})
+        return {"ok": result["ok"], "error": result["error"], "steps": result["steps"], "calls_left": self.agent - self.actions}
+
 
 SPECS = {
     "describe_app": ("Identity of the target app: GTK actions with enabled state and parameter type, GTK 4 frame "
@@ -166,6 +181,11 @@ SPECS = {
     "test_manifest": ("Run a manifest against the real app with Surgeon's executor, check its verification, then run "
                       "its undo steps. Pass the full manifest object. At most 5 calls per request.",
                       {"type": "object", "properties": {"manifest": {"type": "object"}}, "required": ["manifest"]}),
+    "run_steps": ("Run manifest steps on the real app now, in order, with no undo. Each step is an object exactly as in "
+                  "a manifest's steps (gtk_action, frame_action, cli, launch, activate, set_text, wait_for, "
+                  "confirm_if_present), with type, label, reversible and its fields. Stops at the first failing step.",
+                  {"type": "object", "properties": {"steps": {"type": "array", "items": {"type": "object"}}},
+                   "required": ["steps"]}),
 }
 
 
@@ -180,6 +200,9 @@ def summarize(name, args, res):
 
 
 def serve(tools):
+    hidden = "test_manifest" if tools.agent else "run_steps"
+    specs = {k: v for k, v in SPECS.items() if k != hidden}
+
     def reply(rid, result=None, error=None):
         msg = {"jsonrpc": "2.0", "id": rid, **({"error": error} if error else {"result": result})}
         sys.stdout.write(json.dumps(msg) + "\n")
@@ -198,14 +221,14 @@ def serve(tools):
                         "capabilities": {"tools": {}}, "serverInfo": {"name": "surgeon", "version": "0.1.0"}})
         elif method == "tools/list":
             reply(rid, {"tools": [{"name": k, "description": desc, "inputSchema": schema}
-                                  for k, (desc, schema) in SPECS.items()]})
+                                  for k, (desc, schema) in specs.items()]})
         elif method == "tools/call":
             name, args = req["params"]["name"], req["params"].get("arguments") or {}
             try:
-                if name not in SPECS:
+                if name not in specs:
                     raise SurgeonError(f"Unknown tool {name!r}.")
                 res = getattr(tools, name)(**args)
-                if name != "test_manifest":
+                if name not in ("test_manifest", "run_steps"):
                     tools.log({"tool": name, "args": args, "ok": True, "summary": summarize(name, args, res)})
                 if isinstance(res, dict) and "__image__" in res:
                     content = [{"type": "image", "data": res["__image__"], "mimeType": "image/png"}]
@@ -226,5 +249,6 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--xid", required=True)
     ap.add_argument("--job", required=True)
+    ap.add_argument("--agent", type=int, default=0)
     a = ap.parse_args()
-    serve(Tools(a.xid, a.job))
+    serve(Tools(a.xid, a.job, a.agent))
