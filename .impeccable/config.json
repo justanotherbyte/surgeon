@@ -1,0 +1,77 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "inter",
+        "createdAt": "2026-11-01T13:04:50.946Z",
+        "reason": "agent: brief pins a clean macOS feel; Inter is the open face closest to SF Pro on Linux, on an Operate overlay"
+      },
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          "ui/specimen.html"
+        ],
+        "createdAt": "2026-11-01T13:04:50.959Z",
+        "reason": "agent: fixed-height flex rows and chips center their text (28-46px boxes); mock desktop scene is a full-bleed frame"
+      },
+      {
+        "rule": "clipped-overflow-container",
+        "value": "*",
+        "files": [
+          "ui/specimen.html"
+        ],
+        "createdAt": "2026-11-01T13:04:50.971Z",
+        "reason": "agent: the scene is a mock desktop frame that must clip its windows"
+      },
+      {
+        "rule": "nested-cards",
+        "value": "*",
+        "files": [
+          "ui/specimen.html"
+        ],
+        "createdAt": "2026-11-01T13:08:27.789Z",
+        "reason": "agent: panels sit on theme swatch grounds and a mock GTK dialog sits in a mock app window; neither is a card in a card"
+      },
+      {
+        "rule": "repeating-stripes-gradient",
+        "value": "*",
+        "files": [
+          "ui/specimen.html"
+        ],
+        "createdAt": "2026-11-01T13:13:49.329Z",
+        "reason": "agent: the repeating gradient is the image editor's transparency checkerboard in the mock Pinta canvas"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "sans",
+        "files": [
+          "ui/specimen.html"
+        ],
+        "createdAt": "2026-11-01T13:19:56.517Z",
+        "reason": "agent: Ubuntu Sans styles only the mock Pinta window, which imitates a GTK app and is not part of Surgeon's type system"
+      },
+      {
+        "rule": "broken-image",
+        "value": "*",
+        "files": [
+          "app/panel.html"
+        ],
+        "createdAt": "2026-11-01T13:52:24.253Z",
+        "reason": "agent decision: app icon imgs start hidden and panel.ts sets src from the helper's icon path at runtime; they stay hidden when no icon exists"
+      },
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          "app/panel.html"
+        ],
+        "createdAt": "2026-11-01T14:00:21.280Z",
+        "reason": "agent decision: command bar uses ui/surgeon.css .bar-row (46px, align-items center, no vertical padding) as in the approved specimen; screenshots show ~9px vertical inset"
+      }
+    ]
+  }
+}

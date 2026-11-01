@@ -1,0 +1,605 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "feasible",
+    "summary",
+    "steps",
+    "verification",
+    "undo",
+    "routes_tried",
+    "verified"
+  ],
+  "properties": {
+    "feasible": {
+      "type": "boolean"
+    },
+    "summary": {
+      "type": "string",
+      "description": "One line for the user. If not feasible, why"
+    },
+    "steps": {
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type",
+              "label",
+              "reversible",
+              "name",
+              "param"
+            ],
+            "properties": {
+              "type": {
+                "const": "gtk_action"
+              },
+              "label": {
+                "type": "string",
+                "description": "The step in plain words for the user, e.g. 'Zoom to 200%'"
+              },
+              "reversible": {
+                "type": "boolean",
+                "description": "true if the undo list reverses this step or it changes nothing lasting"
+              },
+              "name": {
+                "type": "string",
+                "description": "'win.zoom-in' or 'app.new-window', exactly as describe_app lists it"
+              },
+              "param": {
+                "type": [
+                  "number",
+                  "string",
+                  "boolean",
+                  "null"
+                ]
+              }
+            },
+            "description": "Rank 1. A GTK action over D-Bus"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type",
+              "label",
+              "reversible",
+              "name"
+            ],
+            "properties": {
+              "type": {
+                "const": "frame_action"
+              },
+              "label": {
+                "type": "string",
+                "description": "The step in plain words for the user, e.g. 'Zoom to 200%'"
+              },
+              "reversible": {
+                "type": "boolean",
+                "description": "true if the undo list reverses this step or it changes nothing lasting"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "description": "Rank 2. A GTK 4 window action on the accessible frame, e.g. 'page.zoom-in'"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type",
+              "label",
+              "reversible",
+              "argv"
+            ],
+            "properties": {
+              "type": {
+                "const": "cli"
+              },
+              "label": {
+                "type": "string",
+                "description": "The step in plain words for the user, e.g. 'Zoom to 200%'"
+              },
+              "reversible": {
+                "type": "boolean",
+                "description": "true if the undo list reverses this step or it changes nothing lasting"
+              },
+              "argv": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "minItems": 1
+              }
+            },
+            "description": "Rank 4. The app's own binary, no shell. Placeholders: {xid}, {window_id}, {pid}, {date}, {time}, {documents}, {stem}"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type",
+              "label",
+              "reversible",
+              "role",
+              "name",
+              "within"
+            ],
+            "properties": {
+              "type": {
+                "const": "activate"
+              },
+              "label": {
+                "type": "string",
+                "description": "The step in plain words for the user, e.g. 'Zoom to 200%'"
+              },
+              "reversible": {
+                "type": "boolean",
+                "description": "true if the undo list reverses this step or it changes nothing lasting"
+              },
+              "role": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "within": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "description": "Rank 5. Press a control by role and name. within = a window or menu name"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type",
+              "label",
+              "reversible",
+              "role",
+              "name",
+              "within",
+              "text"
+            ],
+            "properties": {
+              "type": {
+                "const": "set_text"
+              },
+              "label": {
+                "type": "string",
+                "description": "The step in plain words for the user, e.g. 'Zoom to 200%'"
+              },
+              "reversible": {
+                "type": "boolean",
+                "description": "true if the undo list reverses this step or it changes nothing lasting"
+              },
+              "role": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "within": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "text": {
+                "type": "string"
+              }
+            },
+            "description": "Fill a text field. name may be '' for the first editable field in `within`. Placeholders: {date}, {time}, {documents}, {stem}"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type",
+              "label",
+              "reversible",
+              "window",
+              "timeout"
+            ],
+            "properties": {
+              "type": {
+                "const": "wait_for"
+              },
+              "label": {
+                "type": "string",
+                "description": "The step in plain words for the user, e.g. 'Zoom to 200%'"
+              },
+              "reversible": {
+                "type": "boolean",
+                "description": "true if the undo list reverses this step or it changes nothing lasting"
+              },
+              "window": {
+                "type": "string"
+              },
+              "timeout": {
+                "type": "number"
+              }
+            },
+            "description": "Wait for a window or dialog by name"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type",
+              "label",
+              "reversible",
+              "window",
+              "button",
+              "timeout"
+            ],
+            "properties": {
+              "type": {
+                "const": "confirm_if_present"
+              },
+              "label": {
+                "type": "string",
+                "description": "The step in plain words for the user, e.g. 'Zoom to 200%'"
+              },
+              "reversible": {
+                "type": "boolean",
+                "description": "true if the undo list reverses this step or it changes nothing lasting"
+              },
+              "window": {
+                "type": "string"
+              },
+              "button": {
+                "type": "string"
+              },
+              "timeout": {
+                "type": "number"
+              }
+            },
+            "description": "Press a button in an optional dialog if it appears"
+          }
+        ]
+      }
+    },
+    "verification": {
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type",
+              "window"
+            ],
+            "properties": {
+              "type": {
+                "const": "window_appears"
+              },
+              "window": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type",
+              "path"
+            ],
+            "properties": {
+              "type": {
+                "const": "file_created"
+              },
+              "path": {
+                "type": "string",
+                "description": "May use {date}, {time}, {documents}, {stem}"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type",
+              "name"
+            ],
+            "properties": {
+              "type": {
+                "const": "action_state"
+              },
+              "name": {
+                "type": "string",
+                "description": "A stateful GTK action whose state must change"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "undo": {
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type",
+              "label",
+              "reversible",
+              "name",
+              "param"
+            ],
+            "properties": {
+              "type": {
+                "const": "gtk_action"
+              },
+              "label": {
+                "type": "string",
+                "description": "The step in plain words for the user, e.g. 'Zoom to 200%'"
+              },
+              "reversible": {
+                "type": "boolean",
+                "description": "true if the undo list reverses this step or it changes nothing lasting"
+              },
+              "name": {
+                "type": "string",
+                "description": "'win.zoom-in' or 'app.new-window', exactly as describe_app lists it"
+              },
+              "param": {
+                "type": [
+                  "number",
+                  "string",
+                  "boolean",
+                  "null"
+                ]
+              }
+            },
+            "description": "Rank 1. A GTK action over D-Bus"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type",
+              "label",
+              "reversible",
+              "name"
+            ],
+            "properties": {
+              "type": {
+                "const": "frame_action"
+              },
+              "label": {
+                "type": "string",
+                "description": "The step in plain words for the user, e.g. 'Zoom to 200%'"
+              },
+              "reversible": {
+                "type": "boolean",
+                "description": "true if the undo list reverses this step or it changes nothing lasting"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "description": "Rank 2. A GTK 4 window action on the accessible frame, e.g. 'page.zoom-in'"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type",
+              "label",
+              "reversible",
+              "argv"
+            ],
+            "properties": {
+              "type": {
+                "const": "cli"
+              },
+              "label": {
+                "type": "string",
+                "description": "The step in plain words for the user, e.g. 'Zoom to 200%'"
+              },
+              "reversible": {
+                "type": "boolean",
+                "description": "true if the undo list reverses this step or it changes nothing lasting"
+              },
+              "argv": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "minItems": 1
+              }
+            },
+            "description": "Rank 4. The app's own binary, no shell. Placeholders: {xid}, {window_id}, {pid}, {date}, {time}, {documents}, {stem}"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type",
+              "label",
+              "reversible",
+              "role",
+              "name",
+              "within"
+            ],
+            "properties": {
+              "type": {
+                "const": "activate"
+              },
+              "label": {
+                "type": "string",
+                "description": "The step in plain words for the user, e.g. 'Zoom to 200%'"
+              },
+              "reversible": {
+                "type": "boolean",
+                "description": "true if the undo list reverses this step or it changes nothing lasting"
+              },
+              "role": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "within": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "description": "Rank 5. Press a control by role and name. within = a window or menu name"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type",
+              "label",
+              "reversible",
+              "role",
+              "name",
+              "within",
+              "text"
+            ],
+            "properties": {
+              "type": {
+                "const": "set_text"
+              },
+              "label": {
+                "type": "string",
+                "description": "The step in plain words for the user, e.g. 'Zoom to 200%'"
+              },
+              "reversible": {
+                "type": "boolean",
+                "description": "true if the undo list reverses this step or it changes nothing lasting"
+              },
+              "role": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "within": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "text": {
+                "type": "string"
+              }
+            },
+            "description": "Fill a text field. name may be '' for the first editable field in `within`. Placeholders: {date}, {time}, {documents}, {stem}"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type",
+              "label",
+              "reversible",
+              "window",
+              "timeout"
+            ],
+            "properties": {
+              "type": {
+                "const": "wait_for"
+              },
+              "label": {
+                "type": "string",
+                "description": "The step in plain words for the user, e.g. 'Zoom to 200%'"
+              },
+              "reversible": {
+                "type": "boolean",
+                "description": "true if the undo list reverses this step or it changes nothing lasting"
+              },
+              "window": {
+                "type": "string"
+              },
+              "timeout": {
+                "type": "number"
+              }
+            },
+            "description": "Wait for a window or dialog by name"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type",
+              "label",
+              "reversible",
+              "window",
+              "button",
+              "timeout"
+            ],
+            "properties": {
+              "type": {
+                "const": "confirm_if_present"
+              },
+              "label": {
+                "type": "string",
+                "description": "The step in plain words for the user, e.g. 'Zoom to 200%'"
+              },
+              "reversible": {
+                "type": "boolean",
+                "description": "true if the undo list reverses this step or it changes nothing lasting"
+              },
+              "window": {
+                "type": "string"
+              },
+              "button": {
+                "type": "string"
+              },
+              "timeout": {
+                "type": "number"
+              }
+            },
+            "description": "Press a button in an optional dialog if it appears"
+          }
+        ]
+      },
+      "description": "Steps that reverse the change, run after a test"
+    },
+    "routes_tried": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "rank",
+          "route",
+          "outcome"
+        ],
+        "properties": {
+          "rank": {
+            "type": "integer"
+          },
+          "route": {
+            "type": "string"
+          },
+          "outcome": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "verified": {
+      "type": "boolean",
+      "description": "true only if test_manifest passed for exactly these steps, verification and undo"
+    }
+  },
+  "title": "Surgeon manifest"
+}

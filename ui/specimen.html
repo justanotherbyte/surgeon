@@ -1,0 +1,634 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Surgeon interface specimen</title>
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="surgeon.css">
+<style>
+  /* Specimen page only. Not part of the overlay. */
+  html { background: light-dark(oklch(0.93 0.003 250), oklch(0.17 0.003 250)); }
+  body { margin: 0; }
+  .page { max-width: 1240px; margin: 0 auto; padding: 40px 40px 96px; }
+  .page-head { display: flex; align-items: flex-end; gap: 24px; margin-bottom: 24px; }
+  .page-head h1 { margin: 0; font-size: 22px; font-weight: 650; letter-spacing: -0.02em; }
+  .page-head p { margin: 4px 0 0; color: var(--ink-2); max-width: 62ch; }
+  .page-head .grow { flex: 1; }
+  .seg { display: inline-flex; padding: 2px; gap: 2px; border-radius: 9px; background: var(--route-control-fill); }
+  .seg button { all: unset; font: 550 12px/1 var(--font-ui); padding: 6px 10px; border-radius: 7px; color: var(--ink-2); }
+  .seg button[aria-pressed="true"] { background: var(--hud-raised); color: var(--ink); box-shadow: 0 0.5px 1.5px var(--shadow-near); }
+  .seg button:focus-visible { outline: 2px solid var(--accent); }
+  h2 { font-size: 15px; font-weight: 650; margin: 64px 0 6px; letter-spacing: -0.01em; }
+  h2 + p { margin: 0 0 20px; color: var(--ink-2); max-width: 70ch; }
+  h3 { font-size: 12px; font-weight: 600; color: var(--ink-3); margin: 0 0 10px; }
+
+  /* Scene: a GNOME desktop with Pinta open. */
+  .scene-wrap { overflow-x: auto; border-radius: 16px; }
+  .scene {
+    position: relative; width: 1160px; height: 640px; overflow: hidden;
+    background: oklch(0.36 0.02 260); border-radius: 16px; color-scheme: light;
+    font-family: var(--font-ui);
+  }
+  .gnome-bar { height: 28px; background: oklch(0.12 0 0); color: oklch(0.92 0 0); font: 600 12.5px/28px var(--font-ui); text-align: center; position: relative; }
+  .gnome-bar .act { position: absolute; left: 14px; top: 0; font-weight: 600; }
+  .gnome-bar .tray-icon { position: absolute; right: 16px; top: 7px; width: 14px; height: 14px; }
+  .gnome-bar .tray-icon { --pip-fill: var(--teal-400); --mark-keyline: transparent; }
+
+  .app {
+    position: absolute; left: 44px; top: 56px; width: 720px; height: 548px;
+    background: #fafafb; border-radius: 12px; overflow: hidden; color: #2e3436;
+    box-shadow: 0 0 0 1px oklch(0 0 0 / 0.25), 0 12px 40px oklch(0 0 0 / 0.45);
+    font: 400 13.5px/1.3 "Ubuntu Sans", var(--font-ui);
+  }
+  .app-head { height: 46px; display: flex; align-items: center; gap: 6px; padding: 0 8px; background: #ebebed; border-bottom: 1px solid #d9d9dc; }
+  .app-head .title { flex: 1; text-align: center; font-weight: 700; }
+  .app-head .title small { display: block; font-weight: 400; font-size: 11.5px; color: #5e5c64; }
+  .gbtn { all: unset; height: 32px; min-width: 32px; padding: 0 8px; box-sizing: border-box; border-radius: 6px; display: inline-grid; place-items: center; color: #2e3436; }
+  .gbtn:hover { background: oklch(0 0 0 / 0.07); }
+  .gbtn .icon { stroke-width: 1.6; }
+  .winctl { width: 24px; height: 24px; border-radius: 50%; background: #dcdcdf; display: grid; place-items: center; margin-left: 6px; }
+  .winctl .icon { width: 12px; height: 12px; stroke-width: 2.2; }
+  .tools { display: flex; gap: 2px; padding: 6px 8px; border-bottom: 1px solid #e3e3e5; background: #f4f4f5; }
+  .tools .div { width: 1px; margin: 6px 6px; background: #d9d9dc; }
+  .canvas { position: absolute; inset: 93px 0 0 0; display: grid; place-items: center;
+    background: repeating-conic-gradient(#e9e9eb 0 25%, #f4f4f5 0 50%) 0 0 / 20px 20px; }
+  .photo { width: 400px; height: 200px; box-shadow: 0 2px 10px oklch(0 0 0 / 0.25); transition: rotate 520ms var(--ease-out), scale 520ms var(--ease-out); display: block; }
+  .photo.rotated { rotate: 90deg; }
+  .photo.small { scale: 0.5; }
+
+  .gdialog {
+    position: absolute; left: 50%; top: 50%; width: 300px; translate: -50% -42%;
+    background: #fff; border-radius: 12px; padding: 20px; box-sizing: border-box;
+    box-shadow: 0 0 0 1px oklch(0 0 0 / 0.12), 0 10px 32px oklch(0 0 0 / 0.3);
+    opacity: 0; scale: 0.96; transition: opacity 160ms, scale 160ms var(--ease-out); pointer-events: none;
+  }
+  .gdialog.open { opacity: 1; scale: 1; }
+  .gdialog .gtitle { margin: 0 0 14px; font-size: 15px; font-weight: 700; text-align: center; }
+  .gfield { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .gfield label { width: 56px; }
+  .gfield .entry { width: 90px; height: 32px; border-radius: 6px; background: #ebebed; padding: 0 9px; display: flex; align-items: center; font-variant-numeric: tabular-nums; }
+  .gdialog .acts { display: flex; gap: 8px; margin-top: 14px; }
+  .gdialog .acts span { flex: 1; height: 32px; border-radius: 6px; display: grid; place-items: center; background: #ebebed; font-weight: 700; }
+  .gdialog .acts .sugg { background: #3584e4; color: #fff; }
+
+  .cursor { position: absolute; width: 20px; height: 26px; pointer-events: none; z-index: 5; }
+  .overlay { position: absolute; inset: 0; pointer-events: none; z-index: 6; }
+  .overlay .hud { position: absolute; pointer-events: auto; }
+  .overlay .toast { position: absolute; }
+  .typed::after { content: ""; display: inline-block; width: 1.5px; height: 18px; margin-left: 1px; vertical-align: -3px; background: var(--accent); animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .scene-foot { display: flex; align-items: center; gap: 12px; margin-top: 12px; color: var(--ink-2); font-size: 12px; }
+  .scene-foot .grow { flex: 1; }
+
+  /* Surfaces in both themes. */
+  .themes { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .theme-col { border-radius: 16px; padding: 28px; display: grid; gap: 28px; align-content: start; }
+  .theme-col[data-theme="light"] { background: oklch(0.925 0.005 250); }
+  .theme-col[data-theme="dark"] { background: oklch(0.2 0.006 250); }
+  .theme-col .label-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .pips { display: flex; gap: 22px; align-items: flex-end; }
+  .pips figure { margin: 0; display: grid; justify-items: center; gap: 8px; }
+  .pips .pip { position: relative; }
+  .pips.big { margin-top: 24px; gap: 40px; }
+  .pips.big .pip { --pip: 54px; }
+  .pips figcaption { font-size: 11px; color: var(--ink-3); }
+  .mark-demo { position: relative; display: inline-flex; gap: 8px; margin-top: 48px; padding: 6px; border-radius: 10px; background: light-dark(#f4f4f5, #2a2a2e); }
+  .mark-demo .gbtn { color: light-dark(#2e3436, #eee); }
+  .mark-demo .mark { left: 46px; top: 6px; width: 32px; height: 32px; animation: none; }
+  .fit { justify-self: start; }
+
+  /* Foundations. */
+  .found { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .card { background: var(--hud); border: 0.5px solid var(--hud-edge); border-radius: var(--r-panel); padding: 20px; }
+  .sw { display: grid; grid-template-columns: 28px 1fr auto; gap: 4px 10px; align-items: center; font-size: 12px; margin-bottom: 8px; }
+  .sw i { width: 28px; height: 28px; border-radius: 7px; box-shadow: inset 0 0 0 0.5px var(--hud-edge); }
+  .sw code { font: 11px var(--font-code); color: var(--ink-3); }
+  .scale div { display: flex; align-items: baseline; gap: 12px; padding: 6px 0; border-bottom: 0.5px solid var(--hud-line); }
+  .scale code { font: 11px var(--font-code); color: var(--ink-3); width: 112px; flex: none; }
+  table.keys { width: 100%; border-collapse: collapse; }
+  .keys td { padding: 9px 12px 9px 0; border-bottom: 0.5px solid var(--hud-line); vertical-align: top; }
+  .keys td:first-child { width: 190px; }
+  .keys td.when { color: var(--ink-3); font-size: 12px; }
+  .wide { grid-column: span 3; }
+  @media (max-width: 900px) {
+    .page { padding: 24px 16px 64px; }
+    .page-head { flex-wrap: wrap; }
+    .themes, .found { grid-template-columns: minmax(0, 1fr); }
+    .wide { grid-column: auto; }
+    .theme-col { padding: 20px 12px; grid-template-columns: minmax(0, 1fr); }
+    .theme-col .hud { max-width: 100%; }
+    .keys td:first-child { width: auto; }
+  }
+</style>
+</head>
+<body class="sg">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></symbol>
+  <symbol id="i-redo" viewBox="0 0 24 24"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></symbol>
+  <symbol id="i-rotate" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></symbol>
+  <symbol id="i-resize" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="m21 3-7 7"/><path d="m3 21 7-7"/></symbol>
+  <symbol id="i-zoom" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3M11 8v6M8 11h6"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4M12 17h.01"/></symbol>
+  <symbol id="i-ban" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></symbol>
+  <symbol id="i-restart" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></symbol>
+  <symbol id="i-terminal" viewBox="0 0 24 24"><path d="m4 17 6-6-6-6M12 19h8"/></symbol>
+  <symbol id="i-saved" viewBox="0 0 24 24"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></symbol>
+  <symbol id="i-history" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5M12 7v5l4 2"/></symbol>
+  <symbol id="pip-shape" viewBox="0 0 18 18">
+    <circle class="pip-ring" cx="9" cy="9" r="10.5"/>
+    <path class="pip-body" d="M2.6 2.4c-.3-.2-.6.1-.4.4l5.1 12.6c.2.5.9.5 1.1 0l1.7-4.8 4.8-1.7c.5-.2.5-.9 0-1.1z"/>
+    <path class="pip-glyph done" d="M5.4 7.6 7 9.1l2.6-2.8"/>
+    <path class="pip-glyph error" d="M7.4 5.2v2.4M7.4 9.7v.01"/>
+  </symbol>
+</svg>
+
+<main class="page">
+  <header class="page-head">
+    <div class="grow">
+      <h1>Surgeon interface</h1>
+      <p>Every surface Surgeon draws over the desktop, with its tokens and keys. The scene replays demo 5: rotate a photo in Pinta and shrink it to 100 pixels wide.</p>
+    </div>
+    <div class="seg" role="group" aria-label="Theme">
+      <button type="button" data-set-theme="" aria-pressed="true">System</button>
+      <button type="button" data-set-theme="light" aria-pressed="false">Light</button>
+      <button type="button" data-set-theme="dark" aria-pressed="false">Dark</button>
+    </div>
+  </header>
+
+  <div class="scene-wrap">
+  <section class="scene" id="scene" aria-label="Surgeon running a plan in Pinta">
+    <div class="gnome-bar"><span class="act">Activities</span>Sun 1 Nov 14:02<svg class="tray-icon" aria-hidden="true"><use href="#pip-shape"/></svg></div>
+
+    <div class="app" id="app">
+      <div class="app-head">
+        <span class="gbtn"><svg class="icon"><use href="#i-menu"/></svg></span>
+        <span class="title">photo.png<small>Pinta</small></span>
+        <span class="winctl"><svg class="icon"><use href="#i-x"/></svg></span>
+      </div>
+      <div class="tools">
+        <span class="gbtn"><svg class="icon"><use href="#i-undo"/></svg></span>
+        <span class="gbtn"><svg class="icon"><use href="#i-redo"/></svg></span>
+        <span class="div"></span>
+        <span class="gbtn" id="t-rotate"><svg class="icon"><use href="#i-rotate"/></svg></span>
+        <span class="gbtn" id="t-resize"><svg class="icon"><use href="#i-resize"/></svg></span>
+        <span class="gbtn"><svg class="icon"><use href="#i-zoom"/></svg></span>
+      </div>
+      <div class="canvas">
+        <svg class="photo" id="photo" viewBox="0 0 400 200" role="img" aria-label="Sample photo, 200 by 100 pixels">
+          <rect width="400" height="200" fill="#f2c79a"/>
+          <rect width="400" height="120" fill="#f6dcbc"/>
+          <circle cx="292" cy="78" r="26" fill="#fff4e0"/>
+          <path d="M0 132 70 92l52 30 58-44 86 62 52-30 82 48v42H0z" fill="#5f7d6e"/>
+          <path d="M0 160 96 128l78 22 92-30 134 42v38H0z" fill="#3d5a4e"/>
+        </svg>
+      </div>
+      <div class="gdialog" id="dialog" aria-hidden="true">
+        <div class="gtitle">Resize Image</div>
+        <div class="gfield"><label>Width</label><span class="entry" id="d-width">200</span><span>px</span></div>
+        <div class="gfield"><label>Height</label><span class="entry">100</span><span>px</span></div>
+        <div class="acts"><span>Cancel</span><span class="sugg" id="d-ok">Resize</span></div>
+      </div>
+    </div>
+
+    <svg class="cursor" id="cursor" viewBox="0 0 20 26" aria-hidden="true" style="left:640px;top:330px">
+      <path d="M1.5 1.5v19.6l5-4.7 3.3 7.6 3.4-1.5-3.3-7.4h6.9z" fill="#111" stroke="#fff" stroke-width="1.4" stroke-linejoin="round"/>
+    </svg>
+
+    <div class="overlay" id="overlay">
+      <div class="mark" id="mark" hidden><span class="mark-label"><span class="route" data-route="action" id="mark-route">gtk_action rotatecw</span></span></div>
+      <div class="pip" id="pip" data-state="idle"><svg><use href="#pip-shape"/></svg></div>
+
+      <div class="hud bar" id="bar" hidden data-enter>
+        <div class="bar-row">
+          <span class="target"><img class="app-icon" src="specimen-assets/pinta.svg" alt="">Pinta <span class="sub">photo.png</span></span>
+          <span class="bar-input" id="typed" aria-live="polite"></span>
+          <span class="kbd"><kbd>Enter</kbd></span>
+        </div>
+      </div>
+
+      <div class="hud plan" id="plan" hidden data-enter>
+        <div class="plan-head">
+          <img class="app-icon" src="specimen-assets/pinta.svg" alt="Pinta">
+          <span class="plan-ask">Rotate this and make it 100 px wide</span>
+        </div>
+        <ol class="steps" id="steps">
+          <li class="step"><span class="step-state"><svg class="icon"><use href="#i-check"/></svg></span><span class="step-text">Rotate 90° clockwise</span><span class="route" data-route="action">gtk_action rotatecw</span></li>
+          <li class="step"><span class="step-state"><svg class="icon"><use href="#i-check"/></svg></span><span class="step-text">Open Resize Image</span><span class="route" data-route="action">gtk_action resize</span></li>
+          <li class="step"><span class="step-state"><svg class="icon"><use href="#i-check"/></svg></span><span class="step-text">Set Width to 100 px<span class="step-note">Height follows at 50 px</span></span><span class="route" data-route="control">set_value Width</span></li>
+          <li class="step"><span class="step-state"><svg class="icon"><use href="#i-check"/></svg></span><span class="step-text">Press Resize</span><span class="route" data-route="control">activate Resize</span></li>
+        </ol>
+        <div class="plan-foot">
+          <span class="hint" id="plan-hint">All 4 steps can be undone</span>
+          <button class="btn btn-plain" type="button">Edit <span class="kbd"><kbd>Tab</kbd></span></button>
+          <button class="btn btn-primary" type="button" id="run">Run <span class="kbd"><kbd>Enter</kbd></span></button>
+        </div>
+      </div>
+
+      <div class="hud toast" id="toast" hidden data-enter>
+        <svg class="icon ok"><use href="#i-check"/></svg>
+        <span>Rotated and resized photo.png</span>
+        <span class="sep"></span>
+        <span class="kbd">Undo <kbd>Ctrl</kbd><kbd>Alt</kbd><kbd>Z</kbd></span>
+      </div>
+    </div>
+  </section>
+  </div>
+  <div class="scene-foot">
+    <span class="grow">Mock desktop. Pinta, the photo and the dialog are drawn for this page; the Surgeon layer above them uses the real components.</span>
+    <button class="btn" type="button" id="replay"><svg class="icon"><use href="#i-restart"/></svg>Replay</button>
+  </div>
+
+  <h2>Surfaces</h2>
+  <p>Each surface in both themes. The overlay follows the GNOME color scheme, so both have to hold over any app.</p>
+
+  <div class="themes">
+    <div class="theme-col sg" data-theme="light" aria-label="Light theme surfaces"></div>
+    <div class="theme-col sg" data-theme="dark" aria-label="Dark theme surfaces"></div>
+  </div>
+
+  <template id="surfaces">
+    <div>
+      <h3>Companion states</h3>
+      <div class="pips">
+        <figure><div class="pip" data-state="idle"><svg><use href="#pip-shape"/></svg></div><figcaption>Idle</figcaption></figure>
+        <figure><div class="pip" data-state="aim"><svg><use href="#pip-shape"/></svg></div><figcaption>Aiming</figcaption></figure>
+        <figure><div class="pip" data-state="think"><svg><use href="#pip-shape"/></svg></div><figcaption>Planning</figcaption></figure>
+        <figure><div class="pip" data-state="done"><svg><use href="#pip-shape"/></svg></div><figcaption>Done</figcaption></figure>
+        <figure><div class="pip" data-state="error"><svg><use href="#pip-shape"/></svg></div><figcaption>Blocked</figcaption></figure>
+      </div>
+      <div class="pips big" aria-label="Companion states at 3x">
+        <figure><div class="pip" data-state="aim"><svg><use href="#pip-shape"/></svg></div><figcaption>Aiming, acting</figcaption></figure>
+        <figure><div class="pip" data-state="think"><svg><use href="#pip-shape"/></svg></div><figcaption>Planning</figcaption></figure>
+        <figure><div class="pip" data-state="done"><svg><use href="#pip-shape"/></svg></div><figcaption>Done</figcaption></figure>
+        <figure><div class="pip" data-state="error"><svg><use href="#pip-shape"/></svg></div><figcaption>Blocked</figcaption></figure>
+      </div>
+      <div class="mark-demo">
+        <span class="gbtn"><svg class="icon"><use href="#i-undo"/></svg></span>
+        <span class="gbtn"><svg class="icon"><use href="#i-rotate"/></svg></span>
+        <span class="gbtn"><svg class="icon"><use href="#i-resize"/></svg></span>
+        <div class="mark"><span class="mark-label"><span class="route" data-route="action">gtk_action rotatecw</span></span></div>
+      </div>
+    </div>
+
+    <div>
+      <h3>Command bar, with saved commands</h3>
+      <div class="hud bar">
+        <div class="bar-row">
+          <span class="target"><img class="app-icon" src="specimen-assets/calc.svg" alt="">Calc <span class="sub">report.ods</span></span>
+          <input class="bar-input sg-input-focus" placeholder="Ask Surgeon to do something in Calc" aria-label="Command">
+        </div>
+        <div class="hud-section">
+          <div class="list-head">Saved for Calc</div>
+          <ul class="list" role="listbox" aria-label="Saved commands">
+            <li class="row" role="option" aria-selected="true"><svg class="icon"><use href="#i-saved"/></svg><span class="label">Export as PDF, PNG and CSV</span><span class="kbd"><kbd>Ctrl</kbd><kbd>Alt</kbd><kbd>1</kbd></span></li>
+            <li class="row" role="option" aria-selected="false"><svg class="icon"><use href="#i-saved"/></svg><span class="label">Show the exports in Files</span><span class="kbd"><kbd>Ctrl</kbd><kbd>Alt</kbd><kbd>2</kbd></span></li>
+            <li class="row" role="option" aria-selected="false"><svg class="icon"><use href="#i-history"/></svg><span class="label">Freeze the first row</span><span class="kbd">Yesterday</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <h3>Plan with a step that can't be undone</h3>
+      <div class="hud plan">
+        <div class="plan-head">
+          <img class="app-icon" src="specimen-assets/calc.svg" alt="Calc">
+          <span class="plan-ask">Export this sheet as PDF, PNG and CSV</span>
+        </div>
+        <ol class="steps">
+          <li class="step" data-state="done"><span class="step-state"><svg class="icon"><use href="#i-check"/></svg></span><span class="step-text">Export Directly as PDF</span><span class="route" data-route="control">activate</span></li>
+          <li class="step" data-state="running"><span class="step-state"></span><span class="step-text">Export as PNG<span class="step-note">Waiting for PNG Options</span></span><span class="route" data-route="control">confirm_if_present</span></li>
+          <li class="step"><span class="step-state"></span><span class="step-text">Save a copy as CSV<span class="step-note">Replaces report.csv</span></span><span class="step-meta"><span class="tag" data-tone="warn">Can't undo</span><span class="route" data-route="control">activate Save a Copy</span></span></li>
+          <li class="step"><span class="step-state"></span><span class="step-text">Show the files</span><span class="route" data-route="action">dbus_call ShowItems</span></li>
+        </ol>
+        <div class="plan-foot">
+          <span class="hint">Step 3 overwrites a file</span>
+          <button class="btn btn-plain" type="button">Stop <span class="kbd"><kbd>Esc</kbd></span></button>
+          <button class="btn btn-primary" type="button">Confirm <span class="kbd"><kbd>Ctrl</kbd><kbd>Enter</kbd></span></button>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <h3>Toast</h3>
+      <div class="hud toast"><svg class="icon ok"><use href="#i-check"/></svg><span>Font size 22 in Alacritty</span><span class="sep"></span><span class="kbd">Undo <kbd>Ctrl</kbd><kbd>Alt</kbd><kbd>Z</kbd></span></div>
+    </div>
+
+    <div>
+      <h3>Routes: named action, the app's command, pressing a control</h3>
+      <div class="label-row">
+        <span class="route" data-route="action">gtk_action zoom-in</span>
+        <span class="route" data-route="command">cli alacritty msg</span>
+        <span class="route" data-route="control">activate Export</span>
+      </div>
+    </div>
+
+    <div>
+      <h3>Command bar while Surgeon plans</h3>
+      <div class="hud bar">
+        <div class="bar-row">
+          <span class="target"><img class="app-icon" src="specimen-assets/vlc.png" alt="">VLC <span class="sub">lecture-04.mp4</span></span>
+          <span class="bar-input">Go back 10 seconds</span>
+          <span class="bar-status"><span class="pip" data-state="think"><svg><use href="#pip-shape"/></svg></span>Planning</span>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <h3>Aimed at one control (Tab)</h3>
+      <div class="hud bar">
+        <div class="bar-row">
+          <span class="target"><img class="app-icon" src="specimen-assets/pinta.svg" alt="">Pinta <span class="sub">Resize button</span></span>
+          <input class="bar-input sg-input-focus" placeholder="Ask about this button" aria-label="Command">
+          <span class="kbd"><kbd>Tab</kbd> window</span>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <h3>No saved commands yet</h3>
+      <div class="hud bar">
+        <div class="bar-row">
+          <span class="target"><img class="app-icon" src="specimen-assets/calculator.svg" alt="">Calculator</span>
+          <input class="bar-input sg-input-focus" placeholder="Ask Surgeon to do something in Calculator" aria-label="Command">
+        </div>
+        <div class="hud-section"><p class="empty">Try "show me how to work out 7 × 6". Requests you run here show up in this list.</p></div>
+      </div>
+    </div>
+
+    <div>
+      <h3>Failed run</h3>
+      <div class="hud plan">
+        <div class="plan-head">
+          <img class="app-icon" src="specimen-assets/calc.svg" alt="Calc">
+          <span class="plan-ask">Export this sheet as PNG</span>
+        </div>
+        <ol class="steps">
+          <li class="step" data-state="done"><span class="step-state"><svg class="icon"><use href="#i-check"/></svg></span><span class="step-text">Open Export</span><span class="route" data-route="control">activate Export</span></li>
+          <li class="step" data-state="failed"><span class="step-state"><svg class="icon"><use href="#i-x"/></svg></span><span class="step-text">Pick PNG as the format<span class="step-note">The format list has no PNG entry in this Calc version</span></span><span class="route" data-route="control">select Format</span></li>
+          <li class="step"><span class="step-state"></span><span class="step-text">Press Export</span><span class="route" data-route="control">activate Export</span></li>
+        </ol>
+        <div class="plan-foot">
+          <span class="hint">Stopped. Step 1 was undone</span>
+          <button class="btn" type="button">Close <span class="kbd"><kbd>Esc</kbd></span></button>
+          <button class="btn btn-primary" type="button">Try another way <span class="kbd"><kbd>Enter</kbd></span></button>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <h3>Surgeon can't see inside the app</h3>
+      <div class="hud notice" data-tone="warn">
+        <div class="notice-body">
+          <span class="notice-mark"><svg class="icon"><use href="#i-restart"/></svg></span>
+          <span class="notice-title">Restart Obsidian so Surgeon can see inside it</span>
+          <span class="notice-text">Obsidian started without accessibility turned on. Surgeon will reopen it with the flag. Your open notes come back.</span>
+        </div>
+        <div class="notice-foot">
+          <button class="btn" type="button">Not now <span class="kbd"><kbd>Esc</kbd></span></button>
+          <button class="btn btn-primary" type="button">Restart Obsidian <span class="kbd"><kbd>Enter</kbd></span></button>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <h3>Blocked action</h3>
+      <div class="hud notice" data-tone="danger">
+        <div class="notice-body">
+          <span class="notice-mark"><svg class="icon"><use href="#i-ban"/></svg></span>
+          <span class="notice-title">Surgeon won't end processes</span>
+          <span class="notice-text">"End Process" in System Monitor is on the blocked list. Do it yourself from the app if you mean it.</span>
+        </div>
+        <div class="notice-foot"><button class="btn" type="button">OK <span class="kbd"><kbd>Esc</kbd></span></button></div>
+      </div>
+    </div>
+
+    <div>
+      <h3>Command-line only</h3>
+      <div class="hud notice" data-tone="info">
+        <div class="notice-body">
+          <span class="notice-mark"><svg class="icon"><use href="#i-terminal"/></svg></span>
+          <span class="notice-title">Alacritty only takes commands</span>
+          <span class="notice-text">Surgeon can change Alacritty's settings, such as font size, but can't press anything inside it.</span>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <h3>Tray menu</h3>
+      <div class="hud tray">
+        <div class="tray-head"><span class="tray-name">Surgeon</span><span class="status">Helper running</span></div>
+        <div class="hud-section">
+          <div class="list-head">Recent</div>
+          <ul class="list">
+            <li class="row"><img class="app-icon" src="specimen-assets/pinta.svg" alt=""><span class="label">Rotate this and make it 100 px wide</span><span class="kbd">2 min</span></li>
+            <li class="row"><img class="app-icon" src="specimen-assets/vlc.png" alt=""><span class="label">Go back 10 seconds</span><span class="kbd">1 h</span></li>
+          </ul>
+        </div>
+        <div class="hud-section" style="padding: 6px 0">
+          <label class="setting"><span class="label">Summon Surgeon</span><span class="kbd"><kbd>Ctrl</kbd><kbd>Alt</kbd><kbd>Space</kbd></span></label>
+          <label class="setting"><span class="label">Show companion when idle</span><input class="switch" type="checkbox" role="switch" checked></label>
+          <label class="setting"><span class="label">Send window text to the model<small>Off keeps documents and terminals private</small></span><input class="switch" type="checkbox" role="switch"></label>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <h2>Foundations</h2>
+  <p>One family, one accent, three route colours. Every value lives in tokens.css.</p>
+  <div class="found">
+    <div class="card">
+      <h3>Colour</h3>
+      <div class="sw"><i style="background:var(--accent)"></i>Suture teal, Surgeon's own marks<code>--accent</code></div>
+      <div class="sw"><i style="background:var(--route-command)"></i>The app's own CLI or URI<code>--route-command</code></div>
+      <div class="sw"><i style="background:var(--route-control-fill)"></i>Pressing a control by name<code>--route-control</code></div>
+      <div class="sw"><i style="background:var(--warn)"></i>Can't undo, needs restart<code>--warn</code></div>
+      <div class="sw"><i style="background:var(--danger)"></i>Blocked, failed<code>--danger</code></div>
+      <div class="sw"><i style="background:var(--hud)"></i>Panel material<code>--hud</code></div>
+    </div>
+    <div class="card scale">
+      <h3>Type, Inter</h3>
+      <div><code>15 / 600 title</code><span style="font-size:15px;font-weight:600;letter-spacing:-0.011em">Export this sheet</span></div>
+      <div><code>15 / 450 input</code><span style="font-size:15px;letter-spacing:-0.011em">make it bigger</span></div>
+      <div><code>13 / 450 body</code><span>Restart Obsidian</span></div>
+      <div><code>12 / 450 note</code><span style="font-size:12px;color:var(--ink-3)">Height follows at 50 px</span></div>
+      <div><code>11 / 500 caption</code><span style="font-size:11px;font-weight:500">Saved for Calc</span></div>
+      <div><code>11 mono route</code><span class="route" data-route="action">gtk_action rotatecw</span></div>
+    </div>
+    <div class="card scale">
+      <h3>Shape and motion</h3>
+      <div><code>14 px</code><span>Panel radius</span></div>
+      <div><code>8 / 6 / 5 px</code><span>Row, chip, keycap</span></div>
+      <div><code>180 ms</code><span>Panel open, from the cursor's corner</span></div>
+      <div><code>460 ms</code><span>Companion glide to a control</span></div>
+      <div><code>260 ms</code><span>Mark closes in on its target</span></div>
+      <div><code>reduced motion</code><span>No glide; the companion fades across</span></div>
+    </div>
+    <div class="card wide">
+      <h3>Keys</h3>
+      <table class="keys">
+        <tr><td><span class="kbd"><kbd>Ctrl</kbd><kbd>Alt</kbd><kbd>Space</kbd></span></td><td>Open the command bar, aimed at the window under the cursor</td><td class="when">Anywhere</td></tr>
+        <tr><td><span class="kbd">Hold <kbd>Ctrl</kbd><kbd>Alt</kbd><kbd>Space</kbd></span></td><td>Talk instead of type. Release to send</td><td class="when">Later, once voice ships</td></tr>
+        <tr><td><span class="kbd"><kbd>Tab</kbd></span></td><td>Aim at the control under the cursor instead of the whole window. In a plan, edit the request</td><td class="when">Bar or plan open</td></tr>
+        <tr><td><span class="kbd"><kbd>↑</kbd><kbd>↓</kbd></span></td><td>Pick a saved or recent command</td><td class="when">Bar open</td></tr>
+        <tr><td><span class="kbd"><kbd>Enter</kbd></span></td><td>Plan the request, then run the plan</td><td class="when">Bar or plan open</td></tr>
+        <tr><td><span class="kbd"><kbd>Ctrl</kbd><kbd>Enter</kbd></span></td><td>Run a plan with a step that can't be undone</td><td class="when">Plan open</td></tr>
+        <tr><td><span class="kbd"><kbd>Esc</kbd></span></td><td>Close, or stop a running plan after the current step</td><td class="when">Any panel</td></tr>
+        <tr><td><span class="kbd"><kbd>Ctrl</kbd><kbd>Alt</kbd><kbd>Z</kbd></span></td><td>Undo Surgeon's last run</td><td class="when">Anywhere</td></tr>
+        <tr><td><span class="kbd"><kbd>Ctrl</kbd><kbd>Alt</kbd><kbd>1</kbd>…<kbd>9</kbd></span></td><td>Run a saved command for the app in front</td><td class="when">Anywhere</td></tr>
+      </table>
+    </div>
+  </div>
+</main>
+
+<script>
+  // Theme switch for the page.
+  document.querySelectorAll("[data-set-theme]").forEach((b) => b.addEventListener("click", () => {
+    const t = b.dataset.setTheme;
+    t ? document.documentElement.dataset.theme = t : delete document.documentElement.dataset.theme;
+    document.querySelectorAll("[data-set-theme]").forEach((o) => o.setAttribute("aria-pressed", o === b));
+  }));
+
+  // Same surfaces in both theme columns.
+  const tpl = document.getElementById("surfaces");
+  document.querySelectorAll(".theme-col").forEach((c) => c.append(tpl.content.cloneNode(true)));
+
+  // Scene timeline: demo 5 in Pinta.
+  const $ = (id) => document.getElementById(id);
+  const scene = $("scene"), pip = $("pip"), mark = $("mark"), bar = $("bar"), plan = $("plan"), toast = $("toast");
+  const steps = [...document.querySelectorAll("#steps .step")];
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const cursor = { x: 641, y: 331 };
+  let run = 0;
+  const sleep = (ms, id) => new Promise((r, x) => setTimeout(() => (id === run ? r() : x()), ms));
+
+  function rel(el) {
+    const s = scene.getBoundingClientRect(), r = el.getBoundingClientRect();
+    return { x: r.left - s.left, y: r.top - s.top, w: r.width, h: r.height };
+  }
+  // The pip's tip sits at (2,2) inside its box.
+  function pipTo(x, y) {
+    const to = `${x - 2}px ${y - 2}px`;
+    if (!reduce) return (pip.style.translate = to);
+    // Reduced motion: fade out, jump, fade in.
+    pip.style.opacity = 0;
+    setTimeout(() => { pip.style.translate = to; pip.style.opacity = ""; }, 180);
+  }
+  const pipHome = () => pipTo(cursor.x + 14, cursor.y + 16);
+  function markOn(el, route, kind) {
+    const r = rel(el);
+    Object.assign(mark.style, { left: r.x + "px", top: r.y + "px", width: r.w + "px", height: r.h + "px" });
+    $("mark-route").textContent = route;
+    $("mark-route").dataset.route = kind;
+    mark.hidden = true; void mark.offsetWidth; mark.hidden = false;
+    pipTo(r.x + r.w + 3, r.y + r.h + 3);
+  }
+  function place(el) {
+    el.style.left = cursor.x + 18 + "px";
+    el.style.top = cursor.y + 24 + "px";
+  }
+  function reset() {
+    [bar, plan, toast, mark].forEach((e) => (e.hidden = true));
+    $("dialog").classList.remove("open");
+    $("photo").classList.remove("rotated", "small");
+    $("d-width").textContent = "200";
+    $("typed").textContent = "";
+    $("typed").classList.remove("typed");
+    steps.forEach((s) => delete s.dataset.state);
+    setRunning(false);
+    pip.dataset.state = "idle";
+    pipHome();
+  }
+
+  const runHTML = $("run").innerHTML;
+  function setRunning(on) {
+    $("run").className = on ? "btn" : "btn btn-primary";
+    $("run").innerHTML = on ? 'Stop <span class="kbd"><kbd>Esc</kbd></span>' : runHTML;
+    $("plan-hint").textContent = on ? "Running. Esc stops after this step" : "All 4 steps can be undone";
+  }
+
+  async function play() {
+    const id = ++run;
+    reset();
+    try {
+      await sleep(700, id);
+      pip.dataset.state = "aim";
+      place(bar); bar.hidden = false;
+      $("typed").classList.add("typed");
+      for (const ch of "Rotate this and make it 100 px wide") {
+        $("typed").textContent += ch;
+        await sleep(38, id);
+      }
+      await sleep(350, id);
+      pip.dataset.state = "think";
+      await sleep(900, id);
+      bar.hidden = true;
+      place(plan); plan.hidden = false;
+      pip.dataset.state = "aim";
+      await sleep(1500, id);
+
+      setRunning(true);
+      pip.dataset.state = "act";
+      steps[0].dataset.state = "running";
+      markOn($("t-rotate"), "gtk_action rotatecw", "action");
+      await sleep(700, id);
+      $("photo").classList.add("rotated");
+      await sleep(500, id);
+      steps[0].dataset.state = "done";
+
+      steps[1].dataset.state = "running";
+      markOn($("t-resize"), "gtk_action resize", "action");
+      await sleep(600, id);
+      $("dialog").classList.add("open");
+      await sleep(500, id);
+      steps[1].dataset.state = "done";
+
+      steps[2].dataset.state = "running";
+      markOn($("d-width"), "set_value Width", "control");
+      await sleep(650, id);
+      $("d-width").textContent = "100";
+      await sleep(350, id);
+      steps[2].dataset.state = "done";
+
+      steps[3].dataset.state = "running";
+      markOn($("d-ok"), "activate Resize", "control");
+      await sleep(650, id);
+      $("dialog").classList.remove("open");
+      $("photo").classList.add("small");
+      await sleep(400, id);
+      steps[3].dataset.state = "done";
+      mark.hidden = true;
+      await sleep(500, id);
+
+      plan.hidden = true;
+      pip.dataset.state = "done";
+      pipHome();
+      toast.style.left = cursor.x + 18 + "px";
+      toast.style.top = cursor.y + 24 + "px";
+      toast.hidden = false;
+      await sleep(2600, id);
+      pip.dataset.state = "idle";
+    } catch { /* replaced by a newer run */ }
+  }
+
+  // ?frame=act holds the scene mid-run for screenshots.
+  async function frame() {
+    reset();
+    place(plan); plan.hidden = false;
+    steps[0].dataset.state = "done";
+    $("photo").classList.add("rotated");
+    steps[1].dataset.state = "running";
+    setRunning(true);
+    pip.dataset.state = "act";
+    markOn($("t-resize"), "gtk_action resize", "action");
+  }
+
+  $("replay").addEventListener("click", play);
+  document.fonts.ready.then(() => (new URLSearchParams(location.search).get("frame") === "act" ? frame() : play()));
+</script>
+</body>
+</html>

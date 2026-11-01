@@ -1,0 +1,568 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-01T13:19:03+00:00",
+  "title": "Design System: Application Surgeon",
+  "extensions": {
+    "colorMeta": {
+      "suture-teal": {
+        "role": "primary",
+        "displayName": "Suture teal",
+        "canonical": "light-dark(var(--teal-600), var(--teal-500))",
+        "tonalRamp": [
+          "oklch(0.25 0.05 186)",
+          "oklch(0.35 0.07 186)",
+          "oklch(0.47 0.095 186)",
+          "oklch(0.52 0.105 185)",
+          "oklch(0.66 0.13 183)",
+          "oklch(0.74 0.13 182)",
+          "oklch(0.82 0.11 182)",
+          "oklch(0.92 0.05 182)"
+        ]
+      },
+      "suture-teal-ink": {
+        "role": "primary",
+        "displayName": "Suture teal ink",
+        "canonical": "light-dark(var(--teal-700), var(--teal-300))",
+        "tonalRamp": [
+          "oklch(0.25 0.05 186)",
+          "oklch(0.35 0.07 186)",
+          "oklch(0.47 0.095 186)",
+          "oklch(0.52 0.105 185)",
+          "oklch(0.66 0.13 183)",
+          "oklch(0.74 0.13 182)",
+          "oklch(0.82 0.11 182)",
+          "oklch(0.92 0.05 182)"
+        ]
+      },
+      "suture-teal-wash": {
+        "role": "primary",
+        "displayName": "Suture teal wash",
+        "canonical": "--accent-fill",
+        "tonalRamp": [
+          "oklch(0.25 0.05 186)",
+          "oklch(0.35 0.07 186)",
+          "oklch(0.47 0.095 186)",
+          "oklch(0.52 0.105 185)",
+          "oklch(0.66 0.13 183)",
+          "oklch(0.74 0.13 182)",
+          "oklch(0.82 0.11 182)",
+          "oklch(0.92 0.05 182)"
+        ]
+      },
+      "on-teal": {
+        "role": "primary",
+        "displayName": "On teal",
+        "canonical": "--on-accent",
+        "tonalRamp": [
+          "oklch(0.25 0.05 186)",
+          "oklch(0.35 0.07 186)",
+          "oklch(0.47 0.095 186)",
+          "oklch(0.52 0.105 185)",
+          "oklch(0.66 0.13 183)",
+          "oklch(0.74 0.13 182)",
+          "oklch(0.82 0.11 182)",
+          "oklch(0.92 0.05 182)"
+        ]
+      },
+      "command-violet": {
+        "role": "secondary",
+        "displayName": "Command violet",
+        "canonical": "light-dark(var(--violet-600), var(--violet-400))",
+        "tonalRamp": [
+          "oklch(0.2 0.075 295)",
+          "oklch(0.3 0.15 295)",
+          "oklch(0.4 0.15 295)",
+          "oklch(0.5 0.15 295)",
+          "oklch(0.6 0.15 295)",
+          "oklch(0.7 0.15 295)",
+          "oklch(0.8 0.15 295)",
+          "oklch(0.92 0.075 295)"
+        ]
+      },
+      "command-violet-wash": {
+        "role": "secondary",
+        "displayName": "Command violet wash",
+        "canonical": "--route-command-fill",
+        "tonalRamp": [
+          "oklch(0.2 0.075 295)",
+          "oklch(0.3 0.15 295)",
+          "oklch(0.4 0.15 295)",
+          "oklch(0.5 0.15 295)",
+          "oklch(0.6 0.15 295)",
+          "oklch(0.7 0.15 295)",
+          "oklch(0.8 0.15 295)",
+          "oklch(0.92 0.075 295)"
+        ]
+      },
+      "control-wash": {
+        "role": "neutral",
+        "displayName": "Control wash",
+        "canonical": "--route-control-fill",
+        "tonalRamp": [
+          "oklch(0.2 0.004 250)",
+          "oklch(0.3 0.008 250)",
+          "oklch(0.4 0.008 250)",
+          "oklch(0.5 0.008 250)",
+          "oklch(0.6 0.008 250)",
+          "oklch(0.7 0.008 250)",
+          "oklch(0.8 0.008 250)",
+          "oklch(0.92 0.004 250)"
+        ]
+      },
+      "caution-amber": {
+        "role": "tertiary",
+        "displayName": "Caution amber",
+        "canonical": "light-dark(var(--amber-600), var(--amber-400))",
+        "tonalRamp": [
+          "oklch(0.2 0.07 70)",
+          "oklch(0.3 0.14 70)",
+          "oklch(0.4 0.14 70)",
+          "oklch(0.5 0.14 70)",
+          "oklch(0.6 0.14 70)",
+          "oklch(0.7 0.14 70)",
+          "oklch(0.8 0.14 70)",
+          "oklch(0.92 0.07 70)"
+        ]
+      },
+      "caution-amber-wash": {
+        "role": "tertiary",
+        "displayName": "Caution amber wash",
+        "canonical": "--warn-fill",
+        "tonalRamp": [
+          "oklch(0.2 0.07 70)",
+          "oklch(0.3 0.14 70)",
+          "oklch(0.4 0.14 70)",
+          "oklch(0.5 0.14 70)",
+          "oklch(0.6 0.14 70)",
+          "oklch(0.7 0.14 70)",
+          "oklch(0.8 0.14 70)",
+          "oklch(0.92 0.07 70)"
+        ]
+      },
+      "stop-red": {
+        "role": "tertiary",
+        "displayName": "Stop red",
+        "canonical": "light-dark(var(--red-600), var(--red-400))",
+        "tonalRamp": [
+          "oklch(0.2 0.09 26)",
+          "oklch(0.3 0.18 26)",
+          "oklch(0.4 0.18 26)",
+          "oklch(0.5 0.18 26)",
+          "oklch(0.6 0.18 26)",
+          "oklch(0.7 0.18 26)",
+          "oklch(0.8 0.18 26)",
+          "oklch(0.92 0.09 26)"
+        ]
+      },
+      "stop-red-wash": {
+        "role": "tertiary",
+        "displayName": "Stop red wash",
+        "canonical": "--danger-fill",
+        "tonalRamp": [
+          "oklch(0.2 0.09 26)",
+          "oklch(0.3 0.18 26)",
+          "oklch(0.4 0.18 26)",
+          "oklch(0.5 0.18 26)",
+          "oklch(0.6 0.18 26)",
+          "oklch(0.7 0.18 26)",
+          "oklch(0.8 0.18 26)",
+          "oklch(0.92 0.09 26)"
+        ]
+      },
+      "hud": {
+        "role": "neutral",
+        "displayName": "HUD",
+        "canonical": "--hud",
+        "tonalRamp": [
+          "oklch(0.2 0.004 250)",
+          "oklch(0.3 0.008 250)",
+          "oklch(0.4 0.008 250)",
+          "oklch(0.5 0.008 250)",
+          "oklch(0.6 0.008 250)",
+          "oklch(0.7 0.008 250)",
+          "oklch(0.8 0.008 250)",
+          "oklch(0.92 0.004 250)"
+        ]
+      },
+      "hud-raised": {
+        "role": "neutral",
+        "displayName": "HUD raised",
+        "canonical": "--hud-raised",
+        "tonalRamp": [
+          "oklch(0.2 0.004 250)",
+          "oklch(0.3 0.008 250)",
+          "oklch(0.4 0.008 250)",
+          "oklch(0.5 0.008 250)",
+          "oklch(0.6 0.008 250)",
+          "oklch(0.7 0.008 250)",
+          "oklch(0.8 0.008 250)",
+          "oklch(0.92 0.004 250)"
+        ]
+      },
+      "hud-sunken": {
+        "role": "neutral",
+        "displayName": "HUD sunken",
+        "canonical": "--hud-sunken",
+        "tonalRamp": [
+          "oklch(0.2 0.004 250)",
+          "oklch(0.3 0.008 250)",
+          "oklch(0.4 0.008 250)",
+          "oklch(0.5 0.008 250)",
+          "oklch(0.6 0.008 250)",
+          "oklch(0.7 0.008 250)",
+          "oklch(0.8 0.008 250)",
+          "oklch(0.92 0.004 250)"
+        ]
+      },
+      "hud-hover": {
+        "role": "neutral",
+        "displayName": "HUD hover",
+        "canonical": "--hud-hover",
+        "tonalRamp": [
+          "oklch(0.2 0.004 250)",
+          "oklch(0.3 0.008 250)",
+          "oklch(0.4 0.008 250)",
+          "oklch(0.5 0.008 250)",
+          "oklch(0.6 0.008 250)",
+          "oklch(0.7 0.008 250)",
+          "oklch(0.8 0.008 250)",
+          "oklch(0.92 0.004 250)"
+        ]
+      },
+      "hud-line": {
+        "role": "neutral",
+        "displayName": "HUD line",
+        "canonical": "--hud-line",
+        "tonalRamp": [
+          "oklch(0.2 0.004 250)",
+          "oklch(0.3 0.008 250)",
+          "oklch(0.4 0.008 250)",
+          "oklch(0.5 0.008 250)",
+          "oklch(0.6 0.008 250)",
+          "oklch(0.7 0.008 250)",
+          "oklch(0.8 0.008 250)",
+          "oklch(0.92 0.004 250)"
+        ]
+      },
+      "hud-edge": {
+        "role": "neutral",
+        "displayName": "HUD edge",
+        "canonical": "--hud-edge",
+        "tonalRamp": [
+          "oklch(0.2 0.004 250)",
+          "oklch(0.3 0.008 250)",
+          "oklch(0.4 0.008 250)",
+          "oklch(0.5 0.008 250)",
+          "oklch(0.6 0.008 250)",
+          "oklch(0.7 0.008 250)",
+          "oklch(0.8 0.008 250)",
+          "oklch(0.92 0.004 250)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "--ink",
+        "tonalRamp": [
+          "oklch(0.2 0.004 250)",
+          "oklch(0.3 0.008 250)",
+          "oklch(0.4 0.008 250)",
+          "oklch(0.5 0.008 250)",
+          "oklch(0.6 0.008 250)",
+          "oklch(0.7 0.008 250)",
+          "oklch(0.8 0.008 250)",
+          "oklch(0.92 0.004 250)"
+        ]
+      },
+      "ink-2": {
+        "role": "neutral",
+        "displayName": "Ink 2",
+        "canonical": "--ink-2",
+        "tonalRamp": [
+          "oklch(0.2 0.004 250)",
+          "oklch(0.3 0.008 250)",
+          "oklch(0.4 0.008 250)",
+          "oklch(0.5 0.008 250)",
+          "oklch(0.6 0.008 250)",
+          "oklch(0.7 0.008 250)",
+          "oklch(0.8 0.008 250)",
+          "oklch(0.92 0.004 250)"
+        ]
+      },
+      "ink-3": {
+        "role": "neutral",
+        "displayName": "Ink 3",
+        "canonical": "--ink-3",
+        "tonalRamp": [
+          "oklch(0.2 0.004 250)",
+          "oklch(0.3 0.008 250)",
+          "oklch(0.4 0.008 250)",
+          "oklch(0.5 0.008 250)",
+          "oklch(0.6 0.008 250)",
+          "oklch(0.7 0.008 250)",
+          "oklch(0.8 0.008 250)",
+          "oklch(0.92 0.004 250)"
+        ]
+      },
+      "key-fill": {
+        "role": "neutral",
+        "displayName": "Key fill",
+        "canonical": "--key-fill",
+        "tonalRamp": [
+          "oklch(0.2 0.004 250)",
+          "oklch(0.3 0.008 250)",
+          "oklch(0.4 0.008 250)",
+          "oklch(0.5 0.008 250)",
+          "oklch(0.6 0.008 250)",
+          "oklch(0.7 0.008 250)",
+          "oklch(0.8 0.008 250)",
+          "oklch(0.92 0.004 250)"
+        ]
+      },
+      "mark-keyline": {
+        "role": "neutral",
+        "displayName": "Mark keyline",
+        "canonical": "--mark-keyline",
+        "tonalRamp": [
+          "oklch(0.2 0.004 250)",
+          "oklch(0.3 0.008 250)",
+          "oklch(0.4 0.008 250)",
+          "oklch(0.5 0.008 250)",
+          "oklch(0.6 0.008 250)",
+          "oklch(0.7 0.008 250)",
+          "oklch(0.8 0.008 250)",
+          "oklch(0.92 0.004 250)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "title": {
+        "displayName": "Title",
+        "purpose": "The request at the top of a plan."
+      },
+      "input": {
+        "displayName": "Input",
+        "purpose": "The command bar text field."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Step text, row labels, notice text, toasts, buttons."
+      },
+      "small": {
+        "displayName": "Small",
+        "purpose": "Hints, step notes, setting descriptions, bar status."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Sentence-case list headings, tags and keycaps."
+      },
+      "route": {
+        "displayName": "Route",
+        "purpose": "Route chip text only."
+      }
+    },
+    "shadows": [
+      {
+        "name": "hud-shadow",
+        "value": "0 0.5px 0 0 var(--hud-sheen) inset, 0 0 0 0.5px var(--hud-rim) inset, 0 2px 6px -1px var(--shadow-near), 0 14px 38px -10px var(--shadow-far)",
+        "purpose": "Every panel and the toast."
+      },
+      {
+        "name": "button-lift",
+        "value": "0 0.5px 1px var(--shadow-near)",
+        "purpose": "Default and primary buttons."
+      },
+      {
+        "name": "mark-label",
+        "value": "0 2px 8px -2px var(--shadow-far)",
+        "purpose": "The label above a mark."
+      },
+      {
+        "name": "companion-drop",
+        "value": "drop-shadow(0 1px 1.5px oklch(0 0 0 / 0.35))",
+        "purpose": "The companion SVG."
+      },
+      {
+        "name": "mark-keyline",
+        "value": "drop-shadow(0 0 0.75px var(--mark-keyline)) drop-shadow(0 0 0.75px var(--mark-keyline))",
+        "purpose": "Opposite-tone halo on the mark over app pixels."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out",
+        "value": "cubic-bezier(0.22, 1, 0.36, 1)",
+        "purpose": "Ease-out-quint for arrivals: panel entry, mark, companion glide, switch."
+      },
+      {
+        "name": "ease-in-out",
+        "value": "cubic-bezier(0.65, 0, 0.35, 1)",
+        "purpose": "Symmetric moves."
+      },
+      {
+        "name": "t-fast",
+        "value": "120ms",
+        "purpose": "Button hover and press."
+      },
+      {
+        "name": "t-base",
+        "value": "180ms",
+        "purpose": "Panel entry, switch, companion fade and scale."
+      },
+      {
+        "name": "mark-in",
+        "value": "260ms",
+        "purpose": "Mark scales in from 125%."
+      },
+      {
+        "name": "t-glide",
+        "value": "460ms",
+        "purpose": "Companion glide to the mark."
+      },
+      {
+        "name": "t-think",
+        "value": "900ms",
+        "purpose": "One turn of the thinking ring and running step arc."
+      }
+    ],
+    "breakpoints": []
+  },
+  "components": [
+    {
+      "name": "Button",
+      "kind": "button",
+      "refersTo": "button",
+      "description": "Default 28px action with its keycap.",
+      "html": "<button class=\"ds-btn\">Replay <span class=\"ds-kbd\"><kbd>R</kbd></span></button>",
+      "css": ".ds-btn{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 8px 0 10px;border-radius:var(--r-row);border:0.5px solid var(--hud-edge);background:var(--hud-raised);box-shadow:0 0.5px 1px var(--shadow-near);font:550 13px/1 var(--font-ui);letter-spacing:-0.006em;color:var(--ink);cursor:default;transition:background 120ms,scale 120ms}.ds-btn:hover{background:var(--hud-hover)}.ds-btn:active{scale:0.98}.ds-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}.ds-kbd kbd{font:500 11px/1 var(--font-ui);min-width:18px;height:18px;padding:0 5px;display:inline-grid;place-items:center;background:var(--key-fill);border:0.5px solid var(--key-edge);border-bottom-width:1.5px;border-radius:var(--r-key);color:var(--key-ink)}"
+    },
+    {
+      "name": "Primary button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one teal action per panel, usually Run.",
+      "html": "<button class=\"ds-btn-primary\">Run <span class=\"ds-kbd\"><kbd>Enter</kbd></span></button>",
+      "css": ".ds-btn-primary{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 8px 0 10px;border-radius:var(--r-row);border:0.5px solid transparent;background:var(--accent);box-shadow:0 0.5px 1px var(--shadow-near);font:550 13px/1 var(--font-ui);color:var(--on-accent);cursor:default;transition:background 120ms,scale 120ms}.ds-btn-primary:hover{background:color-mix(in oklch,var(--accent) 88%,var(--ink))}.ds-btn-primary:active{scale:0.98}.ds-btn-primary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}.ds-kbd kbd{font:500 11px/1 var(--font-ui);min-width:18px;height:18px;padding:0 5px;display:inline-grid;place-items:center;background:var(--on-accent);border:0.5px solid transparent;border-bottom-width:1.5px;border-radius:var(--r-key);color:var(--accent-ink)}"
+    },
+    {
+      "name": "Plain button",
+      "kind": "button",
+      "refersTo": "button-plain",
+      "description": "Secondary action with no fill, such as Edit.",
+      "html": "<button class=\"ds-btn-plain\">Edit</button>",
+      "css": ".ds-btn-plain{display:inline-flex;align-items:center;height:28px;padding:0 8px 0 10px;border-radius:var(--r-row);border:0;background:none;font:550 13px/1 var(--font-ui);color:var(--ink-2);cursor:default;transition:background 120ms}.ds-btn-plain:hover{background:var(--hud-hover)}.ds-btn-plain:focus-visible{outline:2px solid var(--accent);outline-offset:2px}"
+    },
+    {
+      "name": "Route chips",
+      "kind": "chip",
+      "refersTo": "route-action",
+      "description": "How a step runs: teal named action, violet command, graphite control press.",
+      "html": "<span class=\"ds-route ds-action\">gtk_action rotatecw</span> <span class=\"ds-route ds-command\">cli alacritty msg</span> <span class=\"ds-route ds-control\">activate Resize</span>",
+      "css": ".ds-route{display:inline-flex;align-items:center;gap:4px;height:20px;padding:0 7px 0 6px;border-radius:var(--r-chip);font:500 11px/1 var(--font-code);white-space:nowrap}.ds-route::before{content:\"\";width:6px;height:6px;border-radius:2px;background:currentColor;box-sizing:border-box}.ds-action{color:var(--route-action);background:var(--route-action-fill)}.ds-command{color:var(--route-command);background:var(--route-command-fill)}.ds-control{color:var(--route-control);background:var(--route-control-fill)}.ds-control::before{background:none;border:1.25px solid currentColor}"
+    },
+    {
+      "name": "Command bar",
+      "kind": "input",
+      "refersTo": "command-bar",
+      "description": "Target chip plus a borderless 15px field on a HUD panel.",
+      "html": "<div class=\"ds-bar\"><span class=\"ds-target\">Pinta <span class=\"ds-sub\">photo.png</span></span><input class=\"ds-input\" placeholder=\"Ask Surgeon\"></div>",
+      "css": ".ds-bar{display:flex;align-items:center;gap:8px;width:440px;height:46px;padding:0 10px 0 6px;background:var(--hud);border:0.5px solid var(--hud-edge);border-radius:var(--r-panel);box-shadow:var(--hud-shadow);font:13px/1.38 var(--font-ui);color:var(--ink)}.ds-target{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 8px 0 6px;border-radius:var(--r-row);background:var(--hud-sunken);border:0.5px solid var(--hud-line);font-weight:550;white-space:nowrap}.ds-sub{color:var(--ink-3);font-weight:450}.ds-input{flex:1;min-width:0;border:0;outline:0;background:none;padding:0;font:450 15px/1.2 var(--font-ui);letter-spacing:-0.011em;color:var(--ink);caret-color:var(--accent);text-overflow:ellipsis}.ds-input::placeholder{color:var(--ink-3)}"
+    },
+    {
+      "name": "List row",
+      "kind": "nav",
+      "refersTo": "list-row",
+      "description": "Saved or recent command row; selection takes the teal wash.",
+      "html": "<ul class=\"ds-list\"><li class=\"ds-row\">Rotate 90 degrees</li><li class=\"ds-row\" aria-selected=\"true\">Resize to 100 px</li></ul>",
+      "css": ".ds-list{list-style:none;margin:0;padding:4px;width:300px;font:13px/1.38 var(--font-ui);color:var(--ink)}.ds-row{display:flex;align-items:center;min-height:32px;padding:0 8px;border-radius:var(--r-row);cursor:default}.ds-row:hover{background:var(--hud-hover)}.ds-row[aria-selected=\"true\"]{background:var(--accent-fill)}"
+    },
+    {
+      "name": "Switch",
+      "kind": "input",
+      "refersTo": "switch",
+      "description": "Checkbox with role switch; teal when on.",
+      "html": "<input type=\"checkbox\" role=\"switch\" class=\"ds-switch\" checked>",
+      "css": ".ds-switch{appearance:none;width:30px;height:18px;margin:0;border-radius:9px;background:var(--route-control-fill);box-shadow:inset 0 0 0 0.5px var(--hud-edge);position:relative;transition:background 180ms var(--ease-out)}.ds-switch::after{content:\"\";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:oklch(1 0 0);box-shadow:0 1px 2px oklch(0 0 0 / 0.3);transition:translate 180ms var(--ease-out)}.ds-switch:checked{background:var(--accent)}.ds-switch:checked::after{translate:12px 0}.ds-switch:focus-visible{outline:2px solid var(--accent);outline-offset:2px}"
+    },
+    {
+      "name": "Mark",
+      "kind": "custom",
+      "refersTo": "mark",
+      "description": "Signature: teal corner brackets at a control's accessibility extents, with its route label.",
+      "html": "<div style=\"padding:40px 16px 16px\"><div class=\"ds-mark\" style=\"width:80px;height:28px\"><span class=\"ds-mark-label\">gtk_action resize</span></div></div>",
+      "css": ".ds-mark{position:relative;--arm:8px;--w:2px;border-radius:5px;outline:1px solid color-mix(in oklch,var(--mark) 45%,transparent);outline-offset:2px;background:linear-gradient(var(--mark),var(--mark)) top left/var(--arm) var(--w),linear-gradient(var(--mark),var(--mark)) top left/var(--w) var(--arm),linear-gradient(var(--mark),var(--mark)) top right/var(--arm) var(--w),linear-gradient(var(--mark),var(--mark)) top right/var(--w) var(--arm),linear-gradient(var(--mark),var(--mark)) bottom left/var(--arm) var(--w),linear-gradient(var(--mark),var(--mark)) bottom left/var(--w) var(--arm),linear-gradient(var(--mark),var(--mark)) bottom right/var(--arm) var(--w),linear-gradient(var(--mark),var(--mark)) bottom right/var(--w) var(--arm);background-repeat:no-repeat;padding:5px;box-sizing:content-box;filter:drop-shadow(0 0 0.75px var(--mark-keyline)) drop-shadow(0 0 0.75px var(--mark-keyline))}.ds-mark-label{position:absolute;left:0;bottom:calc(100% + 8px);display:inline-flex;align-items:center;gap:4px;height:20px;padding:0 7px 0 6px;border-radius:var(--r-chip);background:var(--route-action-fill);color:var(--route-action);font:500 11px/1 var(--font-code);white-space:nowrap}"
+    },
+    {
+      "name": "Toast",
+      "kind": "card",
+      "refersTo": "toast",
+      "description": "One-line result with an undo keycap.",
+      "html": "<div class=\"ds-toast\"><svg class=\"ds-ok\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M20 6 9 17l-5-5\"/></svg><span>Rotated and resized photo.png</span><span class=\"ds-sep\"></span><span>Undo</span></div>",
+      "css": ".ds-toast{display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 8px 0 10px;border-radius:18px;background:var(--hud);border:0.5px solid var(--hud-edge);box-shadow:var(--hud-shadow);font:13px/1.38 var(--font-ui);color:var(--ink);white-space:nowrap}.ds-ok{color:var(--accent)}.ds-sep{width:0.5px;align-self:stretch;margin:9px 0;background:var(--hud-line)}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The suture beside the cursor",
+    "overview": "Surgeon is an 18px companion that sits next to the pointer and grows into one small panel only when the user summons it. Every surface is a macOS-style HUD drawn honestly for GNOME on X11. Linux gives an Electron overlay no window blur, so panels are solid and near-opaque (97% light, 96% dark) instead of fake glass. They have a 0.5px hairline edge, a two-layer soft shadow and 14px corners. The system refuses the chat sidebar and the centered Spotlight bar. Panels open below and to the right of the cursor and grow from the corner nearest it.\n\nThe palette is neutral graphite and paper that follows the GNOME colour scheme through CSS `light-dark()`. A `data-theme` attribute pins one scheme. There is one accent, suture teal. GNOME draws focus and selection in blue (#3584e4), so teal keeps Surgeon's marks from ever reading as the app's own. Two more hues carry meaning and nothing else. Violet marks a step that runs the app's command line or a URI. Amber and red mark caution and failure.\n\nDensity is desktop-native. Body text is 13px Inter, rows are 32 to 36px tall, and spacing steps by 2px and 4px. The interaction model, keys and stack are in [docs/interface.md](docs/interface.md). This file covers only the visual system.",
+    "keyCharacteristics": [
+      "Solid near-opaque HUD panels with a 0.5px edge, an inset sheen and a two-layer shadow.",
+      "One accent (suture teal) for focus, selection, primary action, progress and the mark.",
+      "Route chips in a monospace face, coloured by how Surgeon acts.",
+      "The mark, a set of teal corner brackets at a control's real accessibility extents.",
+      "Every colour token is a light and dark pair that follows the system scheme."
+    ],
+    "rules": [
+      {
+        "name": "The Never Blue Rule",
+        "body": "Surgeon's own marks, selection and focus never use blue. GNOME and its apps already draw focus in #3584e4, and Surgeon must stay distinguishable from the app it is operating.",
+        "section": "colors"
+      },
+      {
+        "name": "The Route Colour Rule",
+        "body": "Teal means a named action (`gtk_action`, `frame_action`, `dbus_call`), violet means the app's command line or URI, and graphite means pressing a control by name. Don't use these hues for anything else on a surface that shows routes.",
+        "section": "colors"
+      },
+      {
+        "name": "The Paired Token Rule",
+        "body": "Every theme colour is a `light-dark()` pair. Don't add a colour that has only one value.",
+        "section": "colors"
+      },
+      {
+        "name": "The One Family Rule",
+        "body": "Inter sets everything a person reads. Monospace is reserved for route chips, because a route is a literal identifier.",
+        "section": "typography"
+      },
+      {
+        "name": "The Weight Step Rule",
+        "body": "Hierarchy comes from Inter's variable weights (400, 450, 550, 600, 650) and two sizes (13px and 15px), not from large size jumps or uppercase.",
+        "section": "typography"
+      },
+      {
+        "name": "The Honest Material Rule",
+        "body": "Panels are solid. Don't use `backdrop-filter`, translucent glass, or a background below 96% opacity. The 2px blur in the panel entry animation is motion, not material, and is allowed.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Keyline Rule",
+        "body": "Anything Surgeon draws over app pixels (the mark and the companion) carries a keyline in the opposite tone so it reads on light and dark apps alike.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do put every new surface on the HUD panel material: HUD ground, 0.5px HUD edge, 14px corners and the HUD shadow.",
+      "Do show the route chip on every step, coloured by its route family.",
+      "Do give every button and toast action its keycap, so the whole flow works from the keyboard.",
+      "Do keep hover, press, toggle and panel entry at 120ms or 180ms, and use ease-out-quint (`cubic-bezier(0.22, 1, 0.36, 1)`) for arrivals. Only the mark (260ms) and the companion glide (460ms) run longer.",
+      "Do give anything drawn over app pixels the mark keyline.",
+      "Do honour reduced motion. Animations collapse to 1ms and the companion stops gliding."
+    ],
+    "donts": [
+      "Don't use blue for Surgeon's focus, selection or marks.",
+      "Don't use `backdrop-filter` or translucent glass for panels.",
+      "Don't use violet, amber or red outside their route and status meanings.",
+      "Don't set UI text in the monospace face outside route chips.",
+      "Don't add a colour token without both light and dark values.",
+      "Don't centre a panel on screen or dock it as a sidebar. Panels open beside the cursor."
+    ]
+  }
+}

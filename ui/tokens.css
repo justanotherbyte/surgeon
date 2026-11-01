@@ -1,0 +1,134 @@
+/* Surgeon design tokens. Light and dark follow the GNOME color scheme
+   (Electron maps it to prefers-color-scheme); [data-theme] forces one. */
+
+@font-face {
+  font-family: "Inter";
+  src: url("fonts/InterVariable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: block;
+}
+@font-face {
+  font-family: "Ubuntu Sans Mono";
+  src: url("fonts/UbuntuSansMono.ttf") format("truetype");
+  font-weight: 100 900;
+  font-display: block;
+}
+
+:root {
+  /* Type. 13px is the macOS body size; one family carries everything. */
+  --font-ui: "Inter", "Ubuntu Sans", system-ui, sans-serif;
+  --font-code: "Ubuntu Sans Mono", ui-monospace, monospace;
+  --text-caption: 11px;
+  --text-small: 12px;
+  --text-body: 13px;
+  --text-input: 15px;
+  --text-title: 15px;
+  --leading: 1.38;
+  --tracking-body: -0.006em;
+  --tracking-input: -0.011em;
+
+  /* Space, 4px base. */
+  --s-1: 2px;
+  --s-2: 4px;
+  --s-3: 6px;
+  --s-4: 8px;
+  --s-5: 10px;
+  --s-6: 12px;
+  --s-7: 16px;
+  --s-8: 20px;
+  --s-9: 24px;
+
+  /* Radius: panels, rows, chips, keycaps. */
+  --r-panel: 14px;
+  --r-row: 8px;
+  --r-chip: 6px;
+  --r-key: 5px;
+
+  /* Sizes. */
+  --bar-w: 440px;
+  --bar-h: 46px;
+  --plan-w: 440px;
+  --tray-w: 320px;
+  --pip: 18px;
+  --pip-offset-x: 14px;
+  --pip-offset-y: 16px;
+
+  /* Motion. Ease-out-quint for arrivals; state changes stay under 250ms. */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --t-fast: 120ms;
+  --t-base: 180ms;
+  --t-glide: 460ms;
+  --t-think: 900ms;
+
+  /* Suture teal. GNOME draws focus and selection in blue (#3584e4),
+     so Surgeon's own marks use teal to never read as the app's. */
+  --teal-300: oklch(0.82 0.11 182);
+  --teal-400: oklch(0.74 0.13 182);
+  --teal-500: oklch(0.66 0.13 183);
+  --teal-600: oklch(0.52 0.105 185);
+  --teal-700: oklch(0.47 0.095 186);
+
+  /* Route families: how Surgeon acts. */
+  --violet-400: oklch(0.72 0.13 295);
+  --violet-600: oklch(0.52 0.15 295);
+  --amber-400: oklch(0.8 0.14 75);
+  --amber-600: oklch(0.6 0.13 65);
+  --red-400: oklch(0.7 0.17 25);
+  --red-600: oklch(0.55 0.19 27);
+
+  color-scheme: light dark;
+}
+
+/* Theme colours. light-dark() picks by color-scheme, which follows the
+   GNOME setting; [data-theme] pins one. */
+[data-theme="light"] { color-scheme: light; }
+[data-theme="dark"] { color-scheme: dark; }
+
+:root, [data-theme] {
+  --hud: light-dark(oklch(0.985 0.002 250 / 0.97), oklch(0.245 0.004 250 / 0.96));
+  --hud-raised: light-dark(oklch(1 0 0), oklch(0.29 0.005 250));
+  --hud-sunken: light-dark(oklch(0.955 0.003 250), oklch(0.21 0.004 250));
+  --hud-hover: light-dark(oklch(0.93 0.004 250), oklch(0.32 0.006 250));
+  --hud-line: light-dark(oklch(0.2 0.01 250 / 0.1), oklch(1 0 0 / 0.08));
+  --hud-edge: light-dark(oklch(0.2 0.01 250 / 0.16), oklch(0 0 0 / 0.6));
+  --hud-sheen: light-dark(oklch(1 0 0 / 0.9), oklch(1 0 0 / 0.1));
+  --hud-rim: light-dark(oklch(1 0 0 / 0), oklch(1 0 0 / 0.1));
+  --shadow-near: light-dark(oklch(0.2 0.02 250 / 0.12), oklch(0 0 0 / 0.35));
+  --shadow-far: light-dark(oklch(0.2 0.02 250 / 0.3), oklch(0 0 0 / 0.6));
+  --hud-shadow:
+    0 0.5px 0 0 var(--hud-sheen) inset,
+    0 0 0 0.5px var(--hud-rim) inset,
+    0 2px 6px -1px var(--shadow-near),
+    0 14px 38px -10px var(--shadow-far);
+
+  --ink: light-dark(oklch(0.22 0.008 250), oklch(0.95 0.003 250));
+  --ink-2: light-dark(oklch(0.45 0.01 250), oklch(0.77 0.006 250));
+  --ink-3: light-dark(oklch(0.5 0.01 250), oklch(0.66 0.006 250));
+
+  --accent: light-dark(var(--teal-600), var(--teal-500));
+  --accent-ink: light-dark(var(--teal-700), var(--teal-300));
+  --accent-fill: light-dark(oklch(0.55 0.11 185 / 0.12), oklch(0.66 0.13 183 / 0.18));
+  --on-accent: light-dark(oklch(1 0 0), oklch(0.16 0.02 190));
+
+  --route-action: var(--accent-ink);
+  --route-action-fill: var(--accent-fill);
+  --route-command: light-dark(var(--violet-600), var(--violet-400));
+  --route-command-fill: light-dark(oklch(0.52 0.15 295 / 0.1), oklch(0.72 0.13 295 / 0.16));
+  --route-control: var(--ink-2);
+  --route-control-fill: light-dark(oklch(0.2 0.01 250 / 0.06), oklch(1 0 0 / 0.07));
+
+  --warn: light-dark(var(--amber-600), var(--amber-400));
+  --warn-fill: light-dark(oklch(0.8 0.14 75 / 0.2), oklch(0.8 0.14 75 / 0.14));
+  --danger: light-dark(var(--red-600), var(--red-400));
+  --danger-fill: light-dark(oklch(0.7 0.17 25 / 0.12), oklch(0.7 0.17 25 / 0.16));
+
+  --key-fill: light-dark(oklch(1 0 0), oklch(0.34 0.005 250));
+  --key-edge: light-dark(oklch(0.2 0.01 250 / 0.16), oklch(0 0 0 / 0.5));
+  --key-ink: var(--ink-2);
+
+  /* The mark draws over unknown app pixels, so it carries a keyline in
+     the opposite tone to stay visible on light and dark apps alike. */
+  --mark: light-dark(var(--teal-600), var(--teal-500));
+  --mark-keyline: light-dark(oklch(1 0 0 / 0.85), oklch(0.15 0 0 / 0.7));
+}

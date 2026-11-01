@@ -1,0 +1,20 @@
+{
+  "name": "app-surgeon",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "app/dist/main.js",
+  "scripts": {
+    "build": "tsc -p app",
+    "dev": "npm run build && ./scripts/dev.sh",
+    "test": "/usr/bin/python3 -m unittest discover -s tests -t . -v"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "electron": "^45.2.1",
+    "typescript": "^7.0.2"
+  },
+  "dependencies": {
+    "@openai/codex-sdk": "^0.166.0"
+  }
+}
