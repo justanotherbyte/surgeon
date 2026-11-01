@@ -60,6 +60,30 @@ def target(xid=None):
     }
 
 
+def tools(xid):
+    """What Surgeon can drive in this app, shown in the command bar so people see what's possible."""
+    ident = d.identity(xid)
+    allowed = lambda name: not m.DENY_ACTIONS.match(name)
+    actions = sorted({k.split(".", 1)[1] for k, v in d.gtk_actions(ident).items()
+                      if v["enabled"] and allowed(k.split(".", 1)[1]) and not re.search(r"-\d+-\d+$", k)})
+    frame = d.frame_for(ident)
+    actions += [a for a in (d.action_names(frame) if frame else []) if allowed(a.split(".", 1)[-1])]
+    controls, seen = [], set()
+    for _, (node, _ancestors) in zip(range(3000), d.walk(frame) if frame else ()):  # a capped walk keeps summon fast in huge apps
+        try:
+            if node.get_role_name() not in d.INTERACTIVE:
+                continue
+            name = node.get_name() or ""
+        except GLib.Error:
+            continue
+        key = d.norm(name)
+        if key and key not in seen and not m.DENY_LABELS.match(key):
+            seen.add(key)
+            controls.append(name.split("\n")[0].replace("_", "").strip())
+    return {"actions": actions, "controls": controls, "commands": sorted(m.allowed_binaries(ident)),
+            "dbus": d.dbus_names(ident)}
+
+
 def _shell(ident, fix):
     try:
         return relaunch.shell_command(ident, fix)
@@ -105,6 +129,8 @@ def handle(req):
     cmd = req["cmd"]
     if cmd == "target":
         return target(req.get("xid"))
+    if cmd == "tools":
+        return tools(req["xid"])
     if cmd == "check":
         return {"verified": verified(req["job"], req["manifest"])}
     if cmd == "capture":

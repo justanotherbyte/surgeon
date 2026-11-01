@@ -40,8 +40,14 @@ async function summon() {
   const pos = placeNear(cursor.x, cursor.y, w, h);
   panel.setPosition(pos.x, pos.y);
   if (target) send("target", target);
+  if (target) loadTools(target.ident.xid);
   panel.show();
   panel.focus();
+}
+
+// Walking the app's controls can take a moment, so the panel shows first and the list fills in after.
+function loadTools(xid: string) {
+  helper.call("tools", { xid }).then((tools) => send("tools", { xid, tools }), () => {});
 }
 
 // Sub-app hotkeys are global shortcuts, so they're registered only while their app's window is active.
@@ -175,6 +181,7 @@ app.whenReady().then(() => {
     if (r.ok && r.xid) {
       target = await helper.call("target", { xid: r.xid });
       send("target", target);
+      loadTools(r.xid);
       panel.show();
       panel.focus(); // the restarted app took focus when its window opened
     }
