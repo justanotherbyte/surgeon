@@ -7,7 +7,8 @@
   "scripts": {
     "build": "tsc -p app",
     "dev": "npm run build && ./scripts/dev.sh",
-    "test": "/usr/bin/python3 -m unittest discover -s tests -t . -v"
+    "test": "/usr/bin/python3 -m unittest discover -s tests -t . -v",
+    "video": "env -u ELECTRON_RUN_AS_NODE electron --no-sandbox video/render.cjs"
   },
   "devDependencies": {
     "@types/node": "^26.6.6",

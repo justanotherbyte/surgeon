@@ -1,0 +1,703 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Application Surgeon launch video</title>
+<link rel="stylesheet" href="../ui/tokens.css">
+<link rel="stylesheet" href="../ui/surgeon.css">
+<style>
+  html, body { margin: 0; background: #000; overflow: hidden; }
+  #stage { position: relative; width: 1920px; height: 1080px; overflow: hidden; font-family: var(--font-ui); color-scheme: dark;
+    background:
+      radial-gradient(1200px 800px at 18% 12%, oklch(0.38 0.07 200 / 0.9), transparent 70%),
+      radial-gradient(1100px 900px at 88% 92%, oklch(0.34 0.09 295 / 0.85), transparent 70%),
+      oklch(0.17 0.012 250); }
+  .scene { position: absolute; inset: 0; opacity: 0; }
+  .pip { transition: none !important; }
+
+  /* Title cards */
+  .card { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; text-align: center; color: oklch(0.96 0.003 250); }
+  .card h1 { margin: 0; font-size: 104px; font-weight: 680; letter-spacing: -0.035em; }
+  .card h2 { margin: 0; font-size: 64px; font-weight: 620; letter-spacing: -0.03em; max-width: 1400px; line-height: 1.12; text-wrap: balance; }
+  .card p { margin: 28px 0 0; font-size: 34px; font-weight: 420; color: oklch(0.8 0.006 250); letter-spacing: -0.012em; max-width: 1300px; text-wrap: balance; }
+  .card .big-pip { --pip: 132px; position: relative; margin-bottom: 44px; }
+  .line { opacity: 0; }
+
+  /* GNOME desktop */
+  .gnome-bar { position: absolute; left: 0; right: 0; top: 0; height: 34px; background: oklch(0.1 0 0); color: oklch(0.92 0 0);
+    font: 600 15px/34px var(--font-ui); text-align: center; z-index: 3; }
+  .gnome-bar .act { position: absolute; left: 18px; }
+  .gnome-bar .tray { position: absolute; right: 22px; top: 9px; width: 16px; height: 16px; --pip-fill: var(--teal-400); --mark-keyline: transparent; }
+  .win { position: absolute; background: #fafafb; border-radius: 14px; overflow: hidden; color: #2e3436;
+    box-shadow: 0 0 0 1px oklch(0 0 0 / 0.3), 0 18px 60px oklch(0 0 0 / 0.5); font: 400 16px/1.3 "Ubuntu Sans", var(--font-ui); }
+  .head { height: 54px; display: flex; align-items: center; padding: 0 12px; background: #ebebed; border-bottom: 1px solid #d9d9dc; }
+  .head .title { flex: 1; text-align: center; font-weight: 700; font-size: 16px; }
+  .head .title small { display: block; font-weight: 400; font-size: 13px; color: #5e5c64; }
+  .winctl { width: 28px; height: 28px; border-radius: 50%; background: #dcdcdf; display: grid; place-items: center; font-size: 15px; color: #444; }
+  .gbtn { width: 38px; height: 38px; border-radius: 7px; display: grid; place-items: center; color: #2e3436; }
+
+  /* Image Viewer */
+  #eog { left: 300px; top: 110px; width: 1320px; height: 800px; }
+  #eog .view { position: absolute; inset: 54px 0 0 0; background: #2b2b2e; overflow: hidden; display: grid; place-items: center; }
+  #photo { width: 560px; height: 373px; display: block; box-shadow: 0 4px 20px oklch(0 0 0 / 0.5); }
+  #eog .zoomchip { position: absolute; right: 16px; bottom: 14px; padding: 6px 12px; border-radius: 8px; background: oklch(0 0 0 / 0.6); color: #fff; font: 600 15px/1 var(--font-ui); }
+
+  /* Writer */
+  #writer { left: 140px; top: 90px; width: 1260px; height: 860px; }
+  #writer .menus { display: flex; gap: 22px; padding: 9px 18px; font-size: 15px; background: #f6f6f7; border-bottom: 1px solid #e1e1e3; }
+  #writer .tools { display: flex; gap: 6px; padding: 8px 14px; background: #f6f6f7; border-bottom: 1px solid #dcdcdf; align-items: center; }
+  #writer .tools i { width: 30px; height: 30px; border-radius: 6px; background: #e4e4e7; display: block; }
+  #writer .tools .pdf { width: auto; padding: 0 9px; display: grid; place-items: center; font: 700 12px/1 var(--font-ui); color: #b3261e; background: #f3dcda; font-style: normal; }
+  #writer .tools .sep { width: 1px; height: 22px; background: #d4d4d8; border-radius: 0; margin: 0 6px; }
+  #writer .desk { position: absolute; inset: 158px 0 0 0; background: #d8d8dc; display: flex; justify-content: center; padding-top: 34px; }
+  #writer .page { width: 700px; height: 900px; background: #fff; box-shadow: 0 2px 10px oklch(0 0 0 / 0.18); padding: 70px 80px; box-sizing: border-box; }
+  #writer .page h3 { margin: 0 0 8px; font: 700 34px/1.2 "Liberation Serif", Georgia, serif; color: #1c1c1c; }
+  #writer .page .meta { font: 400 16px/1.4 "Liberation Serif", Georgia, serif; color: #666; margin-bottom: 34px; }
+  #writer .page .ln { height: 11px; border-radius: 3px; background: #e7e7ea; margin: 0 0 15px; }
+
+  /* Files */
+  #files { left: 1220px; top: 330px; width: 600px; height: 420px; }
+  #files .rows { padding: 12px; }
+  #files .row { display: flex; align-items: center; gap: 14px; height: 54px; padding: 0 14px; border-radius: 9px; font-size: 16px; }
+  #files .row .ic { width: 30px; height: 36px; border-radius: 4px; background: #3584e4; display: grid; place-items: center; color: #fff; font: 700 11px/1 var(--font-ui); }
+  #files .row .ic.pdf { background: #c01c28; }
+  #files .row .sz { margin-left: auto; color: #77767b; font-size: 14px; }
+  #files .row.new { background: #d6e5f9; }
+
+  /* Mini windows for "same words" */
+  .trio { position: absolute; left: 120px; right: 120px; top: 300px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 48px; }
+  .slot { opacity: 0; }
+  .mini { position: relative; height: 330px; border-radius: 14px; overflow: hidden; box-shadow: 0 0 0 1px oklch(0 0 0 / 0.35), 0 14px 44px oklch(0 0 0 / 0.5); }
+  .mini .head { height: 52px; }
+  .mini .head .title { font-size: 14px; }
+  .mini .body { position: absolute; inset: 52px 0 0 0; overflow: hidden; }
+  .mini.img .body { background: #2b2b2e; display: grid; place-items: center; }
+  .mini.img svg { width: 200px; height: 133px; }
+  .mini.term .head { background: #303030; color: #eee; border-color: #1e1e1e; }
+  .mini.term .head .winctl { background: #444; color: #ddd; }
+  .mini.term .body { background: #1e1e1e; color: #e6e6e6; padding: 14px 18px; font-family: var(--font-code); line-height: 1.35; transform-origin: top left; }
+  .mini.alac .body { inset: 0; background: #181818; color: #d8d8d8; padding: 18px 20px; font-family: var(--font-code); line-height: 1.35; }
+  .slot-meta { margin-top: 22px; display: grid; gap: 12px; justify-items: start; color: oklch(0.94 0.003 250); }
+  .slot-meta .app { font-size: 26px; font-weight: 620; letter-spacing: -0.015em; }
+  .slot-meta .note { font-size: 20px; color: oklch(0.78 0.006 250); line-height: 1.35; }
+  .chip-wrap { zoom: 1.8; }
+  .prompt { color: #8ae234; }
+
+  /* Overlay layer */
+  /* zoom scales left/top too, so .z coordinates are screen px / 1.75. */
+  .z { position: absolute; zoom: 1.75; z-index: 6; }
+  .z .hud { position: relative; }
+  #cursor { position: absolute; width: 30px; height: 39px; z-index: 8; }
+  .caption { position: absolute; left: 0; right: 0; bottom: 46px; text-align: center; z-index: 9; opacity: 0; }
+  .caption span { display: inline-block; padding: 14px 26px; border-radius: 14px; background: oklch(0.13 0.005 250 / 0.88); color: oklch(0.97 0 0);
+    font-size: 30px; font-weight: 520; letter-spacing: -0.012em; box-shadow: 0 8px 30px oklch(0 0 0 / 0.4); }
+  .keys { position: absolute; left: 50%; top: 50%; translate: -50% -50%; display: flex; gap: 14px; z-index: 10; opacity: 0; }
+  .keys kbd { min-width: 96px; height: 96px; padding: 0 26px; box-sizing: border-box; display: grid; place-items: center; border-radius: 18px;
+    background: oklch(0.3 0.005 250); color: #fff; font: 600 34px/1 var(--font-ui); border: 1px solid oklch(1 0 0 / 0.12); border-bottom-width: 5px;
+    box-shadow: 0 16px 40px oklch(0 0 0 / 0.5); }
+
+  /* Calc and the agent step */
+  .calc { left: 80px; top: 80px; width: 1080px; height: 820px; }
+  .calc .tb { display: flex; gap: 6px; padding: 0 12px; height: 52px; align-items: center; background: #f6f6f7; border-bottom: 1px solid #dcdcdf; }
+  .calc .tb span { height: 34px; padding: 0 12px; border-radius: 6px; display: grid; place-items: center; font: 600 14px/1 var(--font-ui); color: #333; background: #e9e9ec; }
+  .calc .fx { height: 36px; display: flex; align-items: center; gap: 14px; padding: 0 12px; border-bottom: 1px solid #dcdcdf; font-size: 14px; color: #555; background: #fff; }
+  .calc .fx b { width: 70px; color: #333; }
+  .calc .grid { position: absolute; left: 0; right: 0; top: 142px; bottom: 0; background: #fff; overflow: hidden; }
+  .calc .c { position: absolute; box-sizing: border-box; height: 44px; display: flex; align-items: center; padding: 0 14px; font-size: 18px; color: #222;
+    border-right: 1px solid #e2e2e5; border-bottom: 1px solid #e2e2e5; font-variant-numeric: tabular-nums; }
+  .calc .c.n { justify-content: flex-end; }
+  .calc .h { height: 30px; background: #f0f0f2; color: #666; font-size: 13px; justify-content: center; padding: 0; }
+  .calc .rn { width: 50px; background: #f0f0f2; color: #666; font-size: 13px; justify-content: center; padding: 0; }
+  .calc .row { position: absolute; left: 50px; width: 630px; height: 44px; }
+  .calc .chart { position: absolute; left: 712px; top: 46px; width: 340px; height: 330px; background: #fff; border: 1px solid #cfcfd4; border-radius: 4px; box-sizing: border-box; padding: 14px 16px; }
+  .calc .chart b { display: block; font-size: 15px; color: #333; margin-bottom: 10px; }
+  .calc .bars { position: absolute; left: 16px; right: 16px; bottom: 34px; top: 46px; display: flex; align-items: flex-end; gap: 12px; border-bottom: 1px solid #bbb; }
+  .calc .bars i { flex: 1; background: #3584e4; border-radius: 3px 3px 0 0; }
+  .calc .labels { position: absolute; left: 16px; right: 16px; bottom: 10px; display: flex; gap: 12px; font-size: 12px; color: #666; }
+  .calc .labels span { flex: 1; text-align: center; }
+  .ag-sub { display: block; font-size: var(--text-small); font-weight: 450; color: var(--ink-3); }
+
+  /* Accessibility */
+  .layer { position: absolute; inset: 0; opacity: 0; }
+  #vlc { left: 200px; top: 100px; width: 1120px; height: 720px; background: #1b1b1b; color: #ddd; }
+  #vlc .head { background: #2a2a2a; color: #eee; border-color: #111; }
+  #vlc .head .winctl { background: #444; color: #ddd; }
+  #vlc .video { position: absolute; left: 0; right: 0; top: 54px; bottom: 74px; background: oklch(0.3 0.06 255); display: grid; place-content: center; text-align: center; color: #fff; }
+  #vlc .video b { font: 700 52px/1.2 var(--font-ui); letter-spacing: -0.02em; }
+  #vlc .video span { margin-top: 18px; font: 400 36px/1.3 var(--font-code); color: oklch(0.85 0.05 255); }
+  #vlc .ctl { position: absolute; left: 0; right: 0; bottom: 0; height: 74px; display: flex; align-items: center; gap: 18px; padding: 0 22px; font: 500 17px/1 var(--font-code); }
+  #vlc .track { flex: 1; height: 8px; border-radius: 4px; background: #444; position: relative; }
+  #vlc .fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 4px; background: #f78a1d; }
+  #obs { left: 200px; top: 100px; width: 1120px; height: 720px; background: #1e1e24; color: #dcddde; }
+  #obs .head { background: #26262e; color: #eee; border-color: #111; }
+  #obs .head .winctl { background: #3a3a44; color: #ddd; }
+  #obs .side { position: absolute; left: 0; top: 54px; bottom: 0; width: 260px; background: #18181d; padding: 20px; box-sizing: border-box; font-size: 17px; line-height: 2.1; color: #a9a9b3; }
+  #obs .side .on { color: #fff; background: #2f2f3a; border-radius: 6px; padding: 0 10px; margin: 0 -10px; }
+  #obs .note { position: absolute; left: 320px; top: 110px; right: 60px; font-size: 20px; line-height: 1.6; color: #c9cad0; }
+  #obs .note h3 { margin: 0 0 18px; font-size: 38px; color: #fff; letter-spacing: -0.02em; }
+  .ax-count { position: absolute; left: 230px; top: 850px; display: flex; align-items: center; gap: 16px; padding: 14px 22px; border-radius: 14px;
+    background: oklch(0.13 0.005 250 / 0.9); color: #fff; font-size: 24px; box-shadow: 0 8px 30px oklch(0 0 0 / 0.4); }
+  .ax-count b { font: 700 40px/1 var(--font-ui); font-variant-numeric: tabular-nums; min-width: 80px; text-align: right; }
+  .ax-rows { position: absolute; left: 240px; right: 240px; top: 230px; display: grid; gap: 58px; }
+  .ax-rows h2 { margin: 0 0 4px; font-size: 56px; font-weight: 640; letter-spacing: -0.03em; color: #fff; }
+  .ax-row { display: grid; grid-template-columns: 440px 1fr; gap: 40px; align-items: center; opacity: 0; }
+  .ax-row .who { font-size: 34px; font-weight: 620; color: #fff; letter-spacing: -0.015em; }
+  .ax-row p { margin: 6px 0 0; font-size: 28px; line-height: 1.35; color: oklch(0.85 0.004 250); }
+  .ax-row .endkeys { margin: 0; }
+
+  /* Trust */
+  .trust { position: absolute; left: 260px; right: 260px; top: 250px; display: grid; gap: 64px; }
+  .trust h2 { margin: 0 0 6px; font-size: 56px; font-weight: 640; letter-spacing: -0.03em; color: #fff; }
+  .trow { display: grid; grid-template-columns: 520px 1fr; gap: 40px; align-items: center; opacity: 0; }
+  .trow .chips { display: flex; gap: 10px; flex-wrap: wrap; zoom: 1.9; }
+  .trow p { margin: 0; font-size: 30px; line-height: 1.35; color: oklch(0.88 0.004 250); letter-spacing: -0.01em; }
+  .endkeys { display: flex; gap: 12px; margin-top: 52px; }
+  .endkeys kbd { height: 64px; padding: 0 22px; display: grid; place-items: center; border-radius: 14px; background: oklch(0.3 0.005 250); color: #fff;
+    font: 600 26px/1 var(--font-ui); border: 1px solid oklch(1 0 0 / 0.12); border-bottom-width: 4px; }
+  .small { margin-top: 40px !important; font-size: 24px !important; color: oklch(0.66 0.006 250) !important; font-family: var(--font-code); }
+</style>
+</head>
+<body class="sg">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="pip-shape" viewBox="0 0 18 18">
+    <circle class="pip-ring" cx="9" cy="9" r="10.5"/>
+    <path class="pip-body" d="M2.6 2.4c-.3-.2-.6.1-.4.4l5.1 12.6c.2.5.9.5 1.1 0l1.7-4.8 4.8-1.7c.5-.2.5-.9 0-1.1z"/>
+    <path class="pip-glyph done" d="M5.4 7.6 7 9.1l2.6-2.8"/>
+    <path class="pip-glyph error" d="M7.4 5.2v2.4M7.4 9.7v.01"/>
+  </symbol>
+  <symbol id="landscape" viewBox="0 0 300 200">
+    <rect width="300" height="200" fill="#f2c79a"/><rect width="300" height="120" fill="#f6dcbc"/>
+    <circle cx="219" cy="70" r="20" fill="#fff4e0"/>
+    <path d="M0 132 52 92l40 30 44-44 64 62 40-30 60 48v42H0z" fill="#5f7d6e"/>
+    <path d="M0 160 72 128l58 22 70-30 100 42v38H0z" fill="#3d5a4e"/>
+  </symbol>
+</svg>
+
+<div id="stage" class="sg">
+
+  <!-- 1. Title -->
+  <section class="scene" id="s-title">
+    <div class="card">
+      <div class="pip big-pip" id="title-pip" data-state="aim"><svg><use href="#pip-shape"/></svg></div>
+      <h1 class="line" id="title-h">Application Surgeon</h1>
+      <p class="line" id="title-p">Tell any app on your desktop what you want done.</p>
+    </div>
+  </section>
+
+  <!-- 2. Hook -->
+  <section class="scene" id="s-hook">
+    <div class="card">
+      <h2 class="line" id="hook-1">Your apps can already do it.</h2>
+      <p class="line" id="hook-2">The action is three menus deep, behind a dialog, on a shortcut you never learned.</p>
+    </div>
+  </section>
+
+  <!-- 3. Image Viewer -->
+  <section class="scene" id="s-eog">
+    <div class="gnome-bar"><span class="act">Activities</span>Sun 1 Nov 16:20<svg class="tray" aria-hidden="true"><use href="#pip-shape"/></svg></div>
+    <div class="win" id="eog">
+      <div class="head"><span class="gbtn">☰</span><span class="title">lake.jpg<small>Image Viewer</small></span><span class="winctl">✕</span></div>
+      <div class="view"><svg id="photo"><use href="#landscape"/></svg><span class="zoomchip" id="eog-zoom">100%</span></div>
+    </div>
+    <div class="z" id="eog-ui" style="left:589px;top:257px" data-theme="dark">
+      <div class="mark" data-whole id="eog-mark" hidden style="left:-411px;top:-158px;width:743px;height:415px"><span class="mark-label"><span class="route" data-route="action">gtk_action win.zoom-set</span></span></div>
+      <div class="hud bar" id="eog-bar" hidden data-enter>
+        <div class="bar-row">
+          <span class="target">Image Viewer <span class="sub">lake.jpg</span></span>
+          <span class="bar-input" id="eog-typed"></span>
+          <span class="bar-status" id="eog-status" hidden><span class="pip" data-state="think"><svg><use href="#pip-shape"/></svg></span><span>Planning</span></span>
+          <span class="kbd" id="eog-enter"><kbd>Enter</kbd></span>
+        </div>
+      </div>
+      <div class="hud plan" id="eog-plan" hidden data-enter style="margin-top:8px">
+        <div class="plan-head"><span class="plan-ask">Make this bigger<span class="plan-sub" style="display:block;font-size:var(--text-small);font-weight:450;color:var(--ink-3)">Zoom the image to 200%</span></span></div>
+        <ol class="steps">
+          <li class="step" id="eog-step"><span class="step-state"><svg class="icon"><use href="#i-check"/></svg></span><span class="step-text">Zoom to 200%</span><span class="route" data-route="action">gtk_action win.zoom-set</span></li>
+        </ol>
+        <div class="plan-foot">
+          <span class="hint" id="eog-hint">Tested on Image Viewer in 6 s</span>
+          <button class="btn btn-plain" type="button">Save as shortcut</button>
+          <button class="btn btn-primary" type="button" id="eog-run">Run <span class="kbd"><kbd>Enter</kbd></span></button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. Same words, three routes -->
+  <section class="scene" id="s-same">
+    <div class="card" style="place-content:start center;padding-top:120px"><h2 class="line" id="same-h">Same words. Different app, different route.</h2></div>
+    <div class="trio">
+      <div class="slot" id="slot-0">
+        <div class="mini img"><div class="head"><span class="title">lake.jpg<small>Image Viewer</small></span></div><div class="body"><svg id="mini-photo"><use href="#landscape"/></svg></div></div>
+        <div class="slot-meta"><span class="app">Image Viewer</span><span class="chip-wrap"><span class="route" data-route="action">gtk_action win.zoom-set 2.0</span></span><span class="note">The app's own zoom action</span></div>
+      </div>
+      <div class="slot" id="slot-1">
+        <div class="mini term"><div class="head"><span class="title">viswa@desk: ~/demo<small>Terminal</small></span></div>
+          <div class="body" id="mini-term"><span class="prompt">viswa@desk</span>:~/demo$ ls<br>notes.md&nbsp; report.odt&nbsp; lake.jpg<br><span class="prompt">viswa@desk</span>:~/demo$ ▌</div></div>
+        <div class="slot-meta"><span class="app">GNOME Terminal</span><span class="chip-wrap"><span class="route" data-route="action">gtk_action zoom-in</span></span><span class="note">Undo with zoom-normal</span></div>
+      </div>
+      <div class="slot" id="slot-2">
+        <div class="mini alac"><div class="body" id="mini-alac">$ cargo test<br>running 42 tests<br>test result: ok. 42 passed<br>$ ▌</div></div>
+        <div class="slot-meta"><span class="app">Alacritty</span><span class="chip-wrap"><span class="route" data-route="command">cli alacritty msg config font.size=22</span></span><span class="note">No accessibility tree at all, so Surgeon used the app's command line</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. Writer, save as shortcut, then quit Surgeon -->
+  <section class="scene" id="s-writer">
+    <div class="gnome-bar"><span class="act">Activities</span>Sun 1 Nov 16:24<svg class="tray" id="writer-tray" aria-hidden="true"><use href="#pip-shape"/></svg></div>
+    <div class="win" id="writer">
+      <div class="head"><span class="title">q3-report.odt<small>LibreOffice Writer</small></span><span class="winctl">✕</span></div>
+      <div class="menus"><span>File</span><span>Edit</span><span>View</span><span>Insert</span><span>Format</span><span>Styles</span><span>Table</span><span>Form</span><span>Tools</span><span>Window</span><span>Help</span></div>
+      <div class="tools"><i></i><i></i><i></i><i class="pdf" id="w-pdf">PDF</i><i class="sep"></i><i></i><i></i><i></i><i class="sep"></i><i></i><i></i><i></i><i></i></div>
+      <div class="desk"><div class="page">
+        <h3>Q3 field report</h3><div class="meta">North sites, prepared for Friday's review</div>
+        <div class="ln" style="width:100%"></div><div class="ln" style="width:94%"></div><div class="ln" style="width:97%"></div><div class="ln" style="width:62%"></div>
+        <div class="ln" style="width:0;height:22px;background:none"></div>
+        <div class="ln" style="width:99%"></div><div class="ln" style="width:91%"></div><div class="ln" style="width:96%"></div><div class="ln" style="width:88%"></div><div class="ln" style="width:45%"></div>
+      </div></div>
+    </div>
+    <div class="win" id="files" style="opacity:0">
+      <div class="head"><span class="title">Documents<small>Files</small></span><span class="winctl">✕</span></div>
+      <div class="rows">
+        <div class="row"><span class="ic">ODT</span>q3-report.odt<span class="sz">48 kB</span></div>
+        <div class="row"><span class="ic">MD</span>notes.md<span class="sz">2 kB</span></div>
+        <div class="row new" id="files-new"><span class="ic pdf">PDF</span>q3-report-2026-11-01.pdf<span class="sz">112 kB</span></div>
+      </div>
+    </div>
+    <div class="z" id="w-ui" style="left:417px;top:217px" data-theme="dark">
+      <div class="hud bar" id="w-bar" hidden data-enter style="width:560px">
+        <div class="bar-row">
+          <span class="target">Writer <span class="sub">q3-report.odt</span></span>
+          <span class="bar-input" id="w-typed"></span>
+          <span class="bar-status" id="w-status" hidden><span class="pip" data-state="think"><svg><use href="#pip-shape"/></svg></span><span>Planning</span></span>
+          <span class="kbd" id="w-enter"><kbd>Enter</kbd></span>
+        </div>
+      </div>
+      <div class="hud plan" id="w-plan" hidden data-enter style="margin-top:8px;width:560px">
+        <div class="plan-head"><span class="plan-ask">Shortcut that exports this as a PDF<span style="display:block;font-size:var(--text-small);font-weight:450;color:var(--ink-3)">Export the document as a PDF</span></span></div>
+        <ol class="steps">
+          <li class="step"><span class="step-state"><svg class="icon"><use href="#i-check"/></svg></span><span class="step-text">Press Export Directly as PDF</span><span class="route" data-route="control">activate</span></li>
+          <li class="step"><span class="step-state"><svg class="icon"><use href="#i-check"/></svg></span><span class="step-text">Wait for the Export dialog</span><span class="route" data-route="control">wait_for Export</span></li>
+          <li class="step"><span class="step-state"><svg class="icon"><use href="#i-check"/></svg></span><span class="step-text">Name the file</span><span class="route" data-route="control">set_text</span></li>
+          <li class="step"><span class="step-state"><svg class="icon"><use href="#i-check"/></svg></span><span class="step-text">Press Export</span><span class="step-meta"><span class="tag" data-tone="warn">Can't undo</span><span class="route" data-route="control">confirm_if_present</span></span></li>
+        </ol>
+        <div class="plan-foot">
+          <span class="hint" id="w-hint">Tested. Step 4 can't be undone</span>
+          <button class="btn btn-plain" type="button" id="w-save">Save as shortcut</button>
+          <button class="btn btn-primary" type="button">Run <span class="kbd"><kbd>Enter</kbd></span></button>
+        </div>
+      </div>
+      <div class="hud toast" id="w-toast" hidden data-enter style="margin-top:8px">
+        <svg class="icon ok"><use href="#i-check"/></svg>
+        <span>Saved. Press it in Writer any time, even with Surgeon closed</span>
+        <span class="sep"></span>
+        <span class="kbd">Shortcut <kbd>Ctrl</kbd><kbd>Alt</kbd><kbd>1</kbd></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. Agent step: one button, two sheets -->
+  <section class="scene" id="s-agent">
+    <div class="gnome-bar"><span class="act">Activities</span>Sun 1 Nov 16:31<svg class="tray" aria-hidden="true"><use href="#pip-shape"/></svg></div>
+    <div id="calc-A"></div>
+    <div id="calc-B"></div>
+    <div id="ag-marks" data-theme="dark"></div>
+    <div class="z" id="ag-ui" style="zoom:1.5;left:793px;top:64px" data-theme="dark">
+      <div class="hud" style="display:flex;align-items:center;gap:4px;padding:4px 6px;border-radius:var(--r-row);width:max-content">
+        <span class="route" data-route="helper">helper</span>
+        <button class="btn" type="button" id="ag-btn" style="height:26px;padding:0 8px">Make this board-ready</button>
+      </div>
+      <div id="ag-plan-A"></div>
+      <div id="ag-plan-B"></div>
+    </div>
+  </section>
+
+  <!-- 7. Accessibility -->
+  <section class="scene" id="s-access">
+    <div class="gnome-bar" id="ax-gbar"><span class="act">Activities</span>Sun 1 Nov 16:38</div>
+    <div class="layer" id="ax-vlc">
+      <div class="win" id="vlc">
+        <div class="head"><span class="title">lecture-07.mp4<small>VLC media player</small></span><span class="winctl">✕</span></div>
+        <div class="video"><b>Lecture 7: Fourier series</b><span>f(x) = a₀/2 + Σ aₙ cos(nx) + bₙ sin(nx)</span></div>
+        <div class="ctl"><span>⏸</span><span id="vlc-time">12:40</span><div class="track"><div class="fill" id="vlc-fill"></div></div><span>48:15</span></div>
+      </div>
+      <div class="z" id="vlc-ui" style="left:446px;top:194px" data-theme="dark">
+        <div class="hud bar" id="vlc-bar" hidden data-enter>
+          <div class="bar-row">
+            <span class="target">VLC <span class="sub">lecture-07.mp4</span></span>
+            <span class="bar-input" id="vlc-typed"></span>
+            <span class="bar-status" id="vlc-status" hidden><span class="pip" data-state="think"><svg><use href="#pip-shape"/></svg></span><span>Planning</span></span>
+            <span class="kbd" id="vlc-enter"><kbd>Enter</kbd></span>
+          </div>
+        </div>
+        <div class="hud plan" id="vlc-plan" hidden data-enter style="margin-top:8px">
+          <div class="plan-head"><span class="plan-ask">Go back 10 seconds<span class="ag-sub">Seek the lecture back 10 s</span></span></div>
+          <ol class="steps"><li class="step" id="vlc-step"><span class="step-state"><svg class="icon"><use href="#i-check"/></svg></span><span class="step-text">Seek back 10 seconds</span><span class="route" data-route="action">dbus_call MPRIS Seek</span></li></ol>
+          <div class="plan-foot"><span class="hint" id="vlc-hint">Tested on VLC in 4 s</span><button class="btn btn-primary" type="button" id="vlc-run">Run <span class="kbd"><kbd>Enter</kbd></span></button></div>
+        </div>
+      </div>
+    </div>
+    <div class="layer" id="ax-obs">
+      <div class="win" id="obs">
+        <div class="head"><span class="title">Thesis notes<small>Obsidian</small></span><span class="winctl">✕</span></div>
+        <div class="side">Inbox<br><span class="on">Thesis notes</span><br>Reading list<br>Lab log<br>Ideas</div>
+        <div class="note"><h3>Thesis notes</h3>Chapter 3 needs the sampling results from the lab log. Ask Priya about the control group, then redo figure 3.2 with the corrected axis.</div>
+      </div>
+      <div class="ax-count" id="ax-count"><span>Controls a screen reader can see</span><b id="ax-n">2</b></div>
+      <div class="z" id="obs-ui" style="left:400px;top:200px" data-theme="dark">
+        <div class="hud notice" id="obs-notice" hidden data-enter data-tone="warn">
+          <div class="notice-body">
+            <span class="notice-mark"><svg class="icon" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></span>
+            <span class="notice-title">Restart Obsidian so Surgeon can see inside it</span>
+            <span class="notice-text" id="obs-text"></span>
+          </div>
+          <div class="notice-foot">
+            <button class="btn" type="button">Not now <span class="kbd"><kbd>Esc</kbd></span></button>
+            <button class="btn btn-primary" type="button" id="obs-run">Restart Obsidian <span class="kbd"><kbd>Enter</kbd></span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="layer" id="ax-card">
+      <div class="ax-rows">
+        <h2 class="line" id="ax-h">Built for people who can't hunt through menus.</h2>
+        <div class="ax-row" id="ax-0"><span class="chip-wrap" style="zoom:1.9"><span class="route" data-route="action">gtk_action zoom-in</span></span>
+          <div><div class="who">Low vision</div><p>Say "make this bigger" in any app. Surgeon finds each app's own zoom.</p></div></div>
+        <div class="ax-row" id="ax-1"><div class="endkeys"><kbd>Ctrl</kbd><kbd>Alt</kbd><kbd>Space</kbd></div>
+          <div><div class="who">Limited hand movement</div><p>Summon, type, press Enter. No mouse, no small targets to hit.</p></div></div>
+        <div class="ax-row" id="ax-2"><span class="chip-wrap" style="zoom:1.9"><span class="tag" data-tone="warn">Restart Obsidian</span></span>
+          <div><div class="who">Screen readers</div><p>Electron apps come back with their accessibility switched on.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. Trust -->
+  <section class="scene" id="s-trust">
+    <div class="trust">
+      <h2 class="line" id="trust-h">You see every move before it happens.</h2>
+      <div class="trow" id="trust-0"><div class="chips"><span class="route" data-route="action">gtk_action</span><span class="route" data-route="command">cli</span><span class="route" data-route="control">activate</span></div>
+        <p>Each step names its route: a named action in the app, the app's command line, or a control pressed by name. No screenshots, no fake mouse clicks.</p></div>
+      <div class="trow" id="trust-1"><div class="chips"><span class="tag" style="color:var(--accent);background:var(--accent-fill)">Tested</span><span class="tag" data-tone="warn">Not verified</span></div>
+        <p>A plan says Tested only if it passed on the real window. Codex runs read-only, so it can't write that log itself.</p></div>
+      <div class="trow" id="trust-2"><div class="chips"><span class="tag" data-tone="warn">Can't undo</span><span class="tag" data-tone="danger">Blocked</span></div>
+        <p>Steps that can't be undone are marked before you run them. Delete, Quit and End Process are on a denylist.</p></div>
+    </div>
+  </section>
+
+  <!-- 9. End -->
+  <section class="scene" id="s-end">
+    <div class="card">
+      <div class="pip big-pip" data-state="done"><svg><use href="#pip-shape"/></svg></div>
+      <h1>Application Surgeon</h1>
+      <div class="endkeys"><kbd>Ctrl</kbd><kbd>Alt</kbd><kbd>Space</kbd></div>
+      <p class="small">Ubuntu 24.04 · GNOME 46 · X11 · Codex</p>
+    </div>
+  </section>
+
+  <svg id="cursor" viewBox="0 0 20 26" aria-hidden="true" style="opacity:0"><path d="M1.5 1.5v19.6l5-4.7 3.3 7.6 3.4-1.5-3.3-7.4h6.9z" fill="#111" stroke="#fff" stroke-width="1.4" stroke-linejoin="round"/></svg>
+  <div class="keys" id="keys"></div>
+  <div class="caption" id="caption"><span id="caption-text"></span></div>
+</div>
+
+<script>
+const DURATION = 107;
+const $ = (id) => document.getElementById(id);
+const clamp = (x) => Math.max(0, Math.min(1, x));
+const ease = (x) => 1 - Math.pow(1 - x, 3);
+const p = (t, a, b) => ease(clamp((t - a) / (b - a)));
+const lerp = (a, b, k) => a + (b - a) * k;
+// Opacity 0 to 1 over [a, a+f], back to 0 over [b-f, b].
+const env = (t, a, b, f = 0.45) => Math.min(p(t, a, a + f), 1 - p(t, b - f, b));
+const show = (el, on) => { if (el.hidden === on) el.hidden = !on; };
+const type = (el, s, t, a, b) => { el.textContent = s.slice(0, Math.round(s.length * clamp((t - a) / (b - a)))); };
+const rise = (el, t, a, b) => { const k = env(t, a, b, 0.6); el.style.opacity = k; el.style.translate = `0 ${(1 - p(t, a, a + 0.6)) * 24}px`; };
+
+const SCENES = { title: [0, 5], hook: [5, 9.5], eog: [9.5, 25], same: [25, 34], writer: [34, 56], agent: [56, 76], access: [76, 96], trust: [96, 102.5], end: [102.5, DURATION + 1] };
+
+// Captions, keycap overlays and the cursor path, in absolute seconds.
+const CAPTIONS = [
+  [13.6, 16.6, "Codex reads the window through accessibility and D-Bus"],
+  [16.6, 19.4, "Then it tests the plan on the real app before showing it"],
+  [20.4, 24.6, "It called Image Viewer's own zoom action"],
+  [38.0, 41.2, "Ask for a shortcut instead of a one-off"],
+  [41.2, 44.6, "Every step was tested on this Writer window"],
+  [48.6, 51.2, "Now quit Surgeon. Nothing is running."],
+  [51.6, 55.6, "GNOME runs the saved steps itself. The PDF lands in Documents."],
+  [56.6, 59.6, "Some jobs need a judgment call on every run"],
+  [59.6, 64.4, "An agent step reads the sheet, then picks each action"],
+  [64.8, 67.6, "Same button. A different sheet."],
+  [69.6, 75.4, "Different data, different moves. Every step passes Surgeon's checks."],
+  [76.6, 79.6, "No mouse needed. Everything works from the keyboard."],
+  [79.8, 82.8, "Surgeon calls VLC's media API directly. No tiny slider to drag."],
+  [83.8, 86.8, "Electron apps show screen readers an empty window"],
+  [87.0, 90.2, "Surgeon restarts the app with accessibility switched on"],
+];
+const KEYS = [[11.2, 12.0, ["Ctrl", "Alt", "Space"]], [35.4, 36.2, ["Ctrl", "Alt", "Space"]], [50.0, 51.0, ["Ctrl", "Alt", "1"]],
+  [77.0, 77.8, ["Ctrl", "Alt", "Space"]], [80.6, 81.1, ["Enter"]], [84.2, 85.0, ["Ctrl", "Alt", "Space"]], [86.4, 86.9, ["Enter"]]];
+const CURSOR = [ // [t, x, y], linear between points with easing
+  [9.5, 1580, 980, 0], [10.0, 1580, 980, 1], [11.0, 1000, 400, 1], [22, 1000, 400, 1], [25, 1000, 400, 0],
+  [34, 1100, 1000, 0], [34.4, 1100, 1000, 1], [35.2, 700, 330, 1], [55.9, 700, 330, 1], [56.2, 700, 330, 0],
+  [56.3, 1500, 900, 0], [56.8, 1500, 900, 1], [57.8, "ag-btn", 0, 1], [64.4, "ag-btn", 0, 1], [65.0, 900, 620, 1], [65.6, 900, 620, 1], [66.3, "ag-btn", 0, 1], [75.6, "ag-btn", 0, 1], [76, "ag-btn", 0, 0],
+];
+
+function cursorAt(t) {
+  const c = $("cursor");
+  let i = CURSOR.findIndex((k) => k[0] > t);
+  if (i === -1) { c.style.opacity = 0; return; }
+  if (i === 0) { c.style.opacity = 0; return; }
+  // An element id instead of x means "point at that element".
+  const at = ([, x, y]) => { if (typeof x !== "string") return [x, y]; const r = $(x).getBoundingClientRect(); return [r.left + r.width * 0.55, r.top + r.height * 0.45]; };
+  const [t0, , , o0] = CURSOR[i - 1], [t1, , , o1] = CURSOR[i];
+  const [x0, y0] = at(CURSOR[i - 1]), [x1, y1] = at(CURSOR[i]);
+  const k = p(t, t0, t1);
+  c.style.left = lerp(x0, x1, k) + "px"; c.style.top = lerp(y0, y1, k) + "px"; c.style.opacity = lerp(o0, o1, k);
+}
+
+function overlays(t) {
+  const cap = CAPTIONS.find(([a, b]) => t >= a && t < b);
+  $("caption").style.opacity = cap ? env(t, cap[0], cap[1], 0.3) : 0;
+  if (cap && $("caption-text").textContent !== cap[2]) $("caption-text").textContent = cap[2];
+  const k = KEYS.find(([a, b]) => t >= a && t < b);
+  const keys = $("keys");
+  keys.style.opacity = k ? env(t, k[0], k[1], 0.15) : 0;
+  const html = k ? k[2].map((s) => `<kbd>${s}</kbd>`).join("") : "";
+  if (keys.innerHTML !== html) keys.innerHTML = html;
+  if (k) keys.style.scale = 1 - 0.04 * env(t, k[0] + 0.25, k[1] - 0.15, 0.08);
+  cursorAt(t);
+}
+
+function title(t) {
+  $("title-pip").style.scale = 0.6 + 0.4 * p(t, 0.2, 1.1);
+  $("title-pip").style.opacity = p(t, 0.2, 0.8);
+  rise($("title-h"), t, 0.9, 9);
+  rise($("title-p"), t, 1.8, 9);
+}
+function hook(t) { rise($("hook-1"), t, 5.4, 20); rise($("hook-2"), t, 6.6, 20); }
+
+function eog(t) {
+  const u = t - 9.5;
+  show($("eog-bar"), u >= 2.2 && u < 11.6);
+  type($("eog-typed"), "Make this bigger", u, 2.6, 3.8);
+  const planning = u >= 4.2 && u < 7.4;
+  show($("eog-status"), planning); show($("eog-enter"), !planning);
+  show($("eog-plan"), u >= 7.4 && u < 11.6);
+  const running = u >= 9.4 && u < 10.0, done = u >= 10.0;
+  $("eog-step").dataset.state = done ? "done" : running ? "running" : "";
+  $("eog-run").style.scale = u >= 9.1 && u < 9.35 ? 0.96 : 1;
+  $("eog-hint").textContent = done ? "Done" : "Tested on Image Viewer in 6 s";
+  show($("eog-mark"), u >= 9.4 && u < 11.2);
+  const z = p(u, 9.6, 10.5);
+  $("photo").style.scale = 1 + z;
+  $("eog-zoom").textContent = Math.round(100 + 100 * z) + "%";
+}
+
+function same(t) {
+  const u = t - 25;
+  rise($("same-h"), t, 25.3, 40);
+  [0, 1, 2].forEach((i) => rise($("slot-" + i), t, 25.9 + i * 1.3, 40));
+  $("mini-photo").style.scale = 1 + p(u, 1.8, 2.6);
+  $("mini-term").style.fontSize = lerp(15, 25, p(u, 3.1, 3.9)) + "px";
+  $("mini-alac").style.fontSize = lerp(15, 25, p(u, 4.4, 5.2)) + "px";
+}
+
+function writer(t) {
+  const u = t - 34;
+  show($("w-bar"), u >= 1.6 && u < 9.9);
+  type($("w-typed"), "Give me a shortcut that exports this as a PDF", u, 2.0, 3.8);
+  const planning = u >= 4.2 && u < 6.8;
+  show($("w-status"), planning); show($("w-enter"), !planning);
+  show($("w-plan"), u >= 6.8 && u < 9.9);
+  $("w-save").style.scale = u >= 8.6 && u < 8.85 ? 0.96 : 1;
+  $("w-save").style.background = u >= 8.5 && u < 9.9 ? "var(--hud-hover)" : "";
+  $("w-hint").textContent = u >= 8.9 ? "Saved as Ctrl+Alt+1" : "Tested. Step 4 can't be undone";
+  show($("w-toast"), u >= 9.9 && u < 13.8);
+  $("writer-tray").style.opacity = 1 - p(u, 14.4, 14.9);
+  $("w-pdf").style.outline = u >= 16.1 && u < 16.9 ? "2px solid #c01c28" : "";
+  const f = p(u, 17.4, 18.2);
+  $("files").style.opacity = f; $("files").style.translate = `${(1 - f) * 60}px 0`;
+  $("files-new").style.opacity = p(u, 18.0, 18.5);
+}
+
+function trust(t) {
+  rise($("trust-h"), t, 96.3, 199);
+  [0, 1, 2].forEach((i) => rise($("trust-" + i), t, 97.2 + i * 1.3, 199));
+}
+
+// ---------- Agent step: one button, two sheets ----------
+const SHEETS = {
+  A: { file: "sales-q3.ods", head: ["Region", "Rep", "Revenue"],
+    rows: [["North", "Ana", 12400], ["East", "Ben", 31950], ["South", "Chi", 8720], ["West", "Dev", 22310], ["Central", "Eli", 17005], ["North", "Fay", 26480]],
+    sorted: [4, 0, 5, 2, 3, 1] },
+  B: { file: "timesheet-nov.ods", head: ["Date", "Task", "Hours"],
+    rows: [["Nov 4", "Docs", 6.5], ["Nov 2", "Build", 9], ["Nov 5", "Review", 7], ["Nov 3", "Build", 10.5], ["Nov 1", "Planning", 8], ["Nov 6", "Demo", 8.5]],
+    sorted: [3, 1, 4, 2, 0, 5] },
+};
+const TOOLS = ["Freeze", "$ Currency", "Sort ↓", "Sort ↑", "Σ Sum", "Highlight", "Chart"];
+// Steps the agent takes on each run: [start offset from scene start, text, route, toolbar button].
+const RUNS = {
+  A: { at: 2.3, end: 8.4, steps: [[2.8, "Freeze the header row", "activate Freeze First Row", "Freeze"], [4.0, "Format Revenue as currency", "activate Currency", "$ Currency"],
+    [5.2, "Sort by Revenue, largest first", "activate Sort Descending", "Sort ↓"], [6.4, "Insert a bar chart of Revenue", "activate Insert Chart", "Chart"]] },
+  B: { at: 10.4, end: 18.6, steps: [[10.9, "Sort by Date", "activate Sort Ascending", "Sort ↑"], [12.1, "Add a Total row for Hours", "activate AutoSum", "Σ Sum"],
+    [13.3, "Highlight days over 8 hours", "activate Highlight", "Highlight"]] },
+};
+const COLX = [0, 230, 430], COLW = [230, 200, 200];
+const fmt = (k, v, money) => typeof v !== "number" ? v : k === "A" ? (money ? "$" + v.toLocaleString("en-US") : String(v)) : v.toFixed(1);
+
+function buildAgent() {
+  for (const k of ["A", "B"]) {
+    const sh = SHEETS[k];
+    const cells = (r) => r.map((v, c) => `<span class="c${typeof v === "number" ? " n" : ""}" style="left:${COLX[c]}px;width:${COLW[c]}px">${v}</span>`).join("");
+    $("calc-" + k).outerHTML = `<div class="win calc" id="calc-${k}">
+      <div class="head"><span class="title">${sh.file}<small>LibreOffice Calc</small></span><span class="winctl">✕</span></div>
+      <div class="tb">${TOOLS.map((t) => `<span id="tb-${k}-${TOOLS.indexOf(t)}">${t}</span>`).join("")}</div>
+      <div class="fx"><b>A1</b>${sh.head[0]}</div>
+      <div class="grid">
+        <span class="c h" style="left:0;top:0;width:50px"></span>
+        ${["A", "B", "C", "D", "E", "F", "G", "H"].map((l, i) => `<span class="c h" style="top:0;left:${i < 3 ? 50 + COLX[i] : 680 + (i - 3) * 120}px;width:${i < 3 ? COLW[i] : 120}px">${l}</span>`).join("")}
+        ${Array.from({ length: 14 }, (_, i) => `<span class="c rn" style="left:0;top:${30 + i * 44}px">${i + 1}</span>`).join("")}
+        <div class="row" id="${k}-head" style="top:30px">${cells(sh.head)}</div>
+        ${sh.rows.map((r, i) => `<div class="row" id="${k}-r${i}" style="top:${74 + i * 44}px">${cells(r.map((v) => fmt(k, v, false)))}</div>`).join("")}
+        <div class="row" id="${k}-total" style="top:${74 + 6 * 44}px;font-weight:700">${cells(["Total", "", "49.5"])}</div>
+        ${k === "A" ? `<div class="chart" id="A-chart"><b>Revenue by rep</b><div class="bars">${sh.sorted.map(() => "").join("")}${[1, 5, 3, 4, 0, 2].map((i) => `<i data-v="${sh.rows[i][2]}"></i>`).join("")}</div>
+          <div class="labels">${[1, 5, 3, 4, 0, 2].map((i) => `<span>${sh.rows[i][1]}</span>`).join("")}</div></div>` : ""}
+      </div></div>`;
+    const run = RUNS[k];
+    $("ag-plan-" + k).outerHTML = `<div class="hud plan" id="ag-plan-${k}" hidden data-enter style="margin-top:8px">
+      <div class="plan-head"><span class="plan-ask">Make this board-ready<span class="ag-sub">${sh.file}</span></span><span class="tag" data-tone="warn">Codex decides each run</span></div>
+      <ol class="steps">${run.steps.map(([, text, route], i) => `<li class="step" id="ag-${k}-${i}" hidden><span class="step-state"><svg class="icon"><use href="#i-check"/></svg></span><span class="step-text">${text}</span><span class="route" data-route="control">${route}</span></li>`).join("")}</ol>
+      <div class="plan-foot"><span class="hint" id="ag-${k}-hint"></span><span class="route" data-route="helper">agent, up to 8 actions</span></div></div>`;
+    $("ag-marks").insertAdjacentHTML("beforeend", run.steps.map(([, , route], i) => `<div class="mark" id="mk-${k}-${i}" hidden><span class="mark-label"><span class="route" data-route="control">${route}</span></span></div>`).join(""));
+  }
+}
+buildAgent();
+
+function agent(t) {
+  const u = t - 56;
+  $("calc-A").style.opacity = 1 - p(u, 8.4, 9.0);
+  $("calc-B").style.opacity = p(u, 8.4, 9.0);
+  $("ag-ui").style.opacity = p(u, 0.4, 1.0);
+  $("ag-btn").style.scale = (u >= 2.0 && u < 2.2) || (u >= 10.1 && u < 10.3) ? 0.95 : 1;
+  for (const k of ["A", "B"]) {
+    const run = RUNS[k], n = run.steps.length;
+    show($("ag-plan-" + k), u >= run.at && u < run.end);
+    let done = 0;
+    run.steps.forEach(([s, , , tool], i) => {
+      const li = $(`ag-${k}-${i}`);
+      show(li, u >= s);
+      li.dataset.state = u >= s + 0.7 ? "done" : u >= s ? "running" : "";
+      if (u >= s + 0.7) done++;
+      const mk = $(`mk-${k}-${i}`), on = u >= s && u < s + 1.0;
+      show(mk, on);
+      if (on) {
+        const r = $(`tb-${k}-${TOOLS.indexOf(tool)}`).getBoundingClientRect();
+        Object.assign(mk.style, { left: r.left + "px", top: r.top + "px", width: r.width + "px", height: r.height + "px" });
+      }
+    });
+    $(`ag-${k}-hint`).textContent = done === n ? `Done. Used ${n} of 8 actions` : `Reading ${SHEETS[k].file}…`;
+  }
+  // Run A: freeze, currency, sort, chart.
+  const [a1, a2, a3, a4] = RUNS.A.steps.map(([s]) => p(u, s + 0.4, s + 0.9));
+  const hA = $("A-head");
+  hA.style.fontWeight = a1 > 0.5 ? 700 : 400;
+  hA.style.background = `rgba(53,132,228,${0.1 * a1})`;
+  hA.style.boxShadow = a1 > 0 ? `0 ${2 * a1}px 0 #555` : "";
+  SHEETS.A.rows.forEach((r, i) => {
+    const row = $("A-r" + i);
+    row.style.top = 74 + lerp(i, SHEETS.A.sorted[i], a3) * 44 + "px";
+    const c = row.children[2];
+    const text = fmt("A", r[2], a2 > 0.5);
+    if (c.textContent !== text) c.textContent = text;
+    c.style.background = a2 > 0 && a2 < 1 ? "rgba(53,132,228,0.12)" : "";
+  });
+  $("A-chart").style.opacity = a4;
+  [...$("A-chart").querySelectorAll("i")].forEach((b, j) => { b.style.height = (b.dataset.v / 31950) * 100 * p(u, RUNS.A.steps[3][0] + 0.6 + j * 0.08, RUNS.A.steps[3][0] + 1.3 + j * 0.08) + "%"; });
+  $("A-total").style.display = "none";
+  // Run B: sort, total, highlight.
+  const [b1, b2, b3] = RUNS.B.steps.map(([s]) => p(u, s + 0.4, s + 0.9));
+  $("B-head").style.fontWeight = 700;
+  SHEETS.B.rows.forEach((r, i) => {
+    const row = $("B-r" + i);
+    row.style.top = 74 + lerp(i, SHEETS.B.sorted[i], b1) * 44 + "px";
+    row.children[2].style.background = r[2] > 8 ? `rgba(246,211,45,${0.55 * b3})` : "";
+  });
+  $("B-total").style.opacity = b2;
+  $("B-total").style.background = `rgba(53,132,228,${0.1 * b2})`;
+}
+
+function access(t) {
+  $("ax-vlc").style.opacity = env(t, 76, 83.6);
+  $("ax-obs").style.opacity = env(t, 83.2, 90.8);
+  $("ax-card").style.opacity = env(t, 90.4, 97);
+  $("ax-gbar").style.opacity = 1 - p(t, 90.4, 90.9);
+  // VLC, keyboard only: 12:40 of 48:15, back to 12:30.
+  show($("vlc-bar"), t >= 77.4 && t < 82.4);
+  type($("vlc-typed"), "Go back 10 seconds", t, 77.8, 78.8);
+  const planning = t >= 79.0 && t < 80.2;
+  show($("vlc-status"), planning); show($("vlc-enter"), !planning);
+  show($("vlc-plan"), t >= 80.2 && t < 82.4);
+  $("vlc-run").style.scale = t >= 80.7 && t < 80.95 ? 0.96 : 1;
+  const ran = t >= 81.3;
+  $("vlc-step").dataset.state = ran ? "done" : t >= 81.0 ? "running" : "";
+  $("vlc-hint").textContent = ran ? "Done" : "Tested on VLC in 4 s";
+  const sec = 760 - 10 * p(t, 81.1, 81.4) + Math.max(0, t - 81.4);
+  $("vlc-time").textContent = `${Math.floor(sec / 60)}:${String(Math.floor(sec % 60)).padStart(2, "0")}`;
+  $("vlc-fill").style.width = (sec / 2895) * 100 + "%";
+  // Obsidian relaunch.
+  show($("obs-notice"), t >= 84.8 && t < 88.4);
+  const restarting = t >= 86.9;
+  const text = restarting ? "Closing Obsidian and starting it again…" : "Obsidian started without accessibility, so Surgeon can't see its controls. Surgeon can close it and start it again with the accessibility flag. Obsidian may ask about unsaved work first.";
+  if ($("obs-text").textContent !== text) $("obs-text").textContent = text;
+  $("obs-run").style.scale = t >= 86.5 && t < 86.75 ? 0.96 : 1;
+  $("obs").style.opacity = 1 - env(t, 87.1, 88.5, 0.35);
+  const n = t < 88.6 ? 2 : Math.round(lerp(2, 460, p(t, 88.6, 89.6)));
+  $("ax-n").textContent = n;
+  $("ax-n").style.color = n > 2 ? "var(--teal-400)" : "var(--amber-400)";
+  rise($("ax-h"), t, 90.8, 199);
+  [0, 1, 2].forEach((i) => rise($("ax-" + i), t, 91.6 + i * 1.2, 199));
+}
+
+const RENDER = { title, hook, eog, same, writer, agent, access, trust, end: () => {} };
+
+// Pause every CSS animation and drive it from t, so each frame is exact.
+const born = new Map();
+function syncAnimations(t) {
+  for (const a of document.getAnimations()) {
+    if (!born.has(a)) born.set(a, t);
+    a.pause();
+    a.currentTime = Math.max(0, (t - born.get(a)) * 1000);
+  }
+}
+
+// Play order as [from, to] slices of the authored timeline above. Accessibility
+// plays right after the hook so viewers who leave early still see it.
+const ORDER = [[0, 9.5], [76, 96], [9.5, 76], [96, DURATION]];
+const remap = (t) => {
+  for (const [a, b] of ORDER) { if (t < b - a) return a + t; t -= b - a; }
+  return DURATION;
+};
+
+window.seek = (out) => {
+  const t = remap(out);
+  for (const [name, [a, b]] of Object.entries(SCENES)) {
+    const el = $("s-" + name);
+    const o = env(t, a, b, 0.5);
+    el.style.opacity = name === "title" && t < 0.5 ? 1 : o;
+    el.style.visibility = o > 0 || (name === "title" && t < 0.5) ? "visible" : "hidden";
+    if (o > 0) RENDER[name](t);
+  }
+  overlays(t);
+  syncAnimations(out);
+};
+window.DURATION = DURATION;
+
+// Opened in a browser without the renderer: play in real time. #t=40 starts there.
+if (!navigator.userAgent.includes("SurgeonRender")) {
+  const start = performance.now() - (parseFloat(location.hash.replace("#t=", "")) || 0) * 1000;
+  const tick = () => { seek(((performance.now() - start) / 1000) % DURATION); requestAnimationFrame(tick); };
+  document.fonts.ready.then(tick);
+}
+</script>
+</body>
+</html>
