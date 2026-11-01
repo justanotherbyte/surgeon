@@ -10,7 +10,7 @@ import { Helper, REPO, cleanEnv } from "./helper.js";
 
 const SCHEMA = JSON.parse(fs.readFileSync(path.join(REPO, "contracts/manifest.schema.json"), "utf8"));
 const MAX_TESTS = 5; // keep in step with MAX_TESTS in surgeon/mcp.py
-const DATA = path.join(process.env.XDG_DATA_HOME || path.join(os.homedir(), ".local/share"), "app-surgeon");
+export const DATA = path.join(process.env.XDG_DATA_HOME || path.join(os.homedir(), ".local/share"), "app-surgeon");
 
 export type Manifest = {
   feasible: boolean; summary: string; steps: any[]; verification: any[]; undo: any[]; subapp: any | null;
@@ -55,6 +55,7 @@ Sub-apps extend the app with features it doesn't have. Return one (feasible=true
 - "title": fires once per visit when the app's active window title matches trigger.title.pattern (a case-insensitive regular expression) continuously for trigger.title.seconds. For "after 10 seconds on X in Zen", match the page title shown in the window title, for example "/ X" before " — Zen Browser". Only time while that window is active counts.
 - "watch": sample the app window every trigger.watch.interval seconds (2 to 60). mode "changed" fires when the window's pixels change; "settled" fires once they stop changing after a change, for "tell me when the render, export or download finishes". Only the app window can be watched, never the whole screen. Pair it with a "notify" step.
 Two more sub-app steps: "capture" saves a screenshot of the app window (source "window") or the whole screen (source "screen") into the run's working directory, where a later script opens it by file name (PIL and numpy are available). Use "screen" only when the user asks about other windows or the whole screen; the user sees a warning. "notify" shows a desktop notification, with an earlier script's stdout as the body if source is set. The capture_window tool shows you the app window now, to plan a watch or a pixel-reading script.
+"agent" is a step that thinks at run time: each time the trigger fires, Codex reads the app and decides which steps to run toward step.goal, with at most step.max_actions batches of steps. Use it when the right action depends on what the app shows at that moment and fixed steps can't decide, for example "when the build stops, if the log shows an error, open the file and line it names" (watch settled + agent), or "a button that fixes the spelling of the selected heading". Prefer fixed steps whenever they can do the job: they're faster, cost nothing per run and are fully tested. An agent step must have reversible=false. Its final message is saved under step.file, so a later "panel" or "notify" step can show it with source set to that file. The agent can use only the app's own routes (no scripts, no other agents), and everything it reads goes to Codex, so say so in subapp.reads. test_manifest runs the agent for real once, which takes up to 4 minutes; write goal so a run with nothing to do does nothing and reports that.
 Pick keys the app doesn't use. Steps use the same routes and rank order as a normal plan.
 Scripts are the last resort (rank 8): only when ranks 1 to 5 can't do the work at all (for example the app's results aren't in the accessibility tree), add "script" steps. A script is Python you write in subapp.scripts. It runs sandboxed: it can read files and /proc, but has no network, no sockets, no D-Bus or X11, and can't write outside its temp dir. To create files, a script writes them into ./out/ and sets outputs_to on its step to a folder such as "{document.dir}" or "{documents}" (inside the home folder, not hidden). Surgeon copies them there without overwriting anything, then {created} is the first new file's path for later steps, for example a launch step that opens it, or a file_created check. Name new files after the original, such as "out/<stem>-inverted.png"; the original's path is {document.path}. Tests delete created files and close windows launched by the test. A script prints its result to stdout: a JSON list of strings for a list, or plain text. test_manifest tells you only how many rows or characters a panel got, never the text, so print a clear message when the script finds nothing. A "panel" step shows that output beside the app. Script args may use {window.title}, {app.id}, {pid}, {document.path}. The window title is often only a file or folder name; /proc/{pid}/cmdline may hold the path the app was opened with.
 Only when a script step exists: call describe_app (ranks 1 to 4) and find_elements with a real query (rank 5) first, and fill subapp.exhausted with one entry per rank 1 to 5. Outcomes: "unavailable" only when describe_app listed none of that route (rank 1 gtk_actions, 2 frame_actions, 3 dbus_names are empty), "no_match" only for rank 5 when a find_elements search returned nothing, "failed" when a test of that route failed, otherwise "unsuitable" with the reason. Without scripts, exhausted is empty.
@@ -70,6 +71,30 @@ function toolStatus(tool: string, args: any, tests: number): Status {
     case "test_manifest": return { phase: "testing", text: tests > 1 ? `Testing, attempt ${tests} of ${MAX_TESTS}` : "Testing on the real app" };
     default: return { phase: "investigating", text: "Investigating" };
   }
+}
+
+// A Codex thread whose only desktop access is Surgeon's MCP server for one window. mcpArgs adds --agent N.
+export function surgeonThread(xid: string, jobId: string, mcpArgs: string[] = []) {
+  const env = cleanEnv();
+  const pick = (keys: string[]) => Object.fromEntries(keys.map((k) => [k, env[k] ?? ""]));
+  const codex = new Codex({
+    env,
+    config: {
+      mcp_servers: {
+        surgeon: {
+          command: "/usr/bin/python3",
+          args: ["-m", "surgeon.mcp", "--xid", xid, "--job", jobId, ...mcpArgs],
+          env: pick(["DISPLAY", "DBUS_SESSION_BUS_ADDRESS", "XDG_RUNTIME_DIR", "HOME", "PATH", "PYTHONPATH", "SURGEON_NODE"]),
+          default_tools_approval_mode: "approve", // MCP tools fail under approvalPolicy "never" without this
+          tool_timeout_sec: 300, // test_manifest may run an agent step, which gets 240 s
+        },
+      },
+    },
+  });
+  return codex.startThread({
+    workingDirectory: path.join(DATA, "jobs", jobId), sandboxMode: "read-only", networkAccessEnabled: false,
+    webSearchMode: "disabled", approvalPolicy: "never", skipGitRepoCheck: true, modelReasoningEffort: "low",
+  });
 }
 
 export async function runJob(opts: {
@@ -88,26 +113,7 @@ export async function runJob(opts: {
     input.push({ type: "local_image", path: path.join(jobDir, "shot.png") });
   } catch { /* screenshot is context only */ }
 
-  const env = cleanEnv();
-  const pick = (keys: string[]) => Object.fromEntries(keys.map((k) => [k, env[k] ?? ""]));
-  const codex = new Codex({
-    env,
-    config: {
-      mcp_servers: {
-        surgeon: {
-          command: "/usr/bin/python3",
-          args: ["-m", "surgeon.mcp", "--xid", opts.xid, "--job", jobId],
-          env: pick(["DISPLAY", "DBUS_SESSION_BUS_ADDRESS", "XDG_RUNTIME_DIR", "HOME", "PATH", "PYTHONPATH"]),
-          default_tools_approval_mode: "approve", // MCP tools fail under approvalPolicy "never" without this
-          tool_timeout_sec: 90,
-        },
-      },
-    },
-  });
-  const thread = codex.startThread({
-    workingDirectory: jobDir, sandboxMode: "read-only", networkAccessEnabled: false, webSearchMode: "disabled",
-    approvalPolicy: "never", skipGitRepoCheck: true, modelReasoningEffort: "low",
-  });
+  const thread = surgeonThread(opts.xid, jobId);
 
   let final = "";
   let tests = 0;

@@ -309,3 +309,39 @@ class RelaunchTest(unittest.TestCase):
         with mock.patch.object(relaunch.d, "desktop_entry", return_value=info):
             argv, _, _ = relaunch.command({"pid": None, "wm_class": "zen"}, relaunch.FIXES["gecko"])
         self.assertEqual(argv, ["/usr/bin/flatpak", "run", "--env=GNOME_ACCESSIBILITY=1", "app.zen_browser.zen"])
+
+
+AGENT_STEP = {"type": "agent", "label": "Fix it", "reversible": False, "goal": "Open the file the error names",
+              "max_actions": 3, "file": "agent.txt"}
+AGENT = {**copy.deepcopy(SUB), "steps": [AGENT_STEP, {"type": "notify", "label": "Say what happened",
+                                                       "reversible": True, "title": "Done", "source": "agent.txt"}]}
+AGENT["subapp"].update(scripts=[], exhausted=[])
+
+
+class AgentStepTest(unittest.TestCase):
+    def test_check_rules(self):
+        m.check(AGENT, EOG)  # notify may show the agent's message
+        for bad in ({"reversible": True}, {"max_actions": 11}):
+            man = copy.deepcopy(AGENT)
+            man["steps"][0].update(bad)
+            self.assertRaises(m.SurgeonError, m.check, man, EOG)
+        plain = {**copy.deepcopy(AGENT), "subapp": None, "steps": [AGENT_STEP]}
+        self.assertRaises(m.SurgeonError, m.check, plain, EOG)
+        undo = {**copy.deepcopy(AGENT), "undo": [AGENT_STEP]}
+        self.assertRaises(m.SurgeonError, m.check, undo, EOG)
+
+    def test_agent_needs_no_route_proof(self):
+        with mock.patch.object(subapps, "_log", return_value=log_for(AGENT)):
+            self.assertEqual(subapps.gate(AGENT, "job", EOG), [])
+
+    def test_run_agent_reads_the_last_line(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            fake = Path(tmp) / "node"
+            for ok, want in (("true", "m"), ("false", None)):
+                fake.write_text(f'#!/bin/sh\necho noise\necho \'{{"ok": {ok}, "message": "m"}}\'\n')
+                fake.chmod(0o755)
+                with mock.patch.dict(os.environ, {"SURGEON_NODE": str(fake)}):
+                    if want:
+                        self.assertEqual(m.run_agent(AGENT_STEP, {"xid": "0x1"}), want)
+                    else:
+                        self.assertRaises(m.SurgeonError, m.run_agent, AGENT_STEP, {"xid": "0x1"})

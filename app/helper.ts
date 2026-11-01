@@ -12,7 +12,8 @@ export function cleanEnv(extra: Record<string, string> = {}): Record<string, str
   for (const [k, v] of Object.entries(process.env)) {
     if (v !== undefined && !["ELECTRON_RUN_AS_NODE", "NO_AT_BRIDGE", "GTK_MODULES", "CHROME_DESKTOP"].includes(k)) env[k] = v;
   }
-  return { ...env, PYTHONPATH: REPO, ...extra };
+  // SURGEON_NODE: agent steps start app/dist/agent.js with this binary (Electron as Node, or node).
+  return { ...env, PYTHONPATH: REPO, SURGEON_NODE: env.SURGEON_NODE ?? process.execPath, ...extra };
 }
 
 type Pending = { resolve: (v: any) => void; reject: (e: Error) => void; onEvent?: (e: any) => void };
