@@ -220,7 +220,10 @@
   min-height: var(--bar-h);
   box-sizing: border-box;
   padding: 9px var(--s-5) 9px var(--s-3);
+  position: relative;
 }
+/* The chip sits over the input's first line and the text indents past it, so wrapped lines use the full width. */
+.bar-row > .target { position: absolute; top: 9px; left: var(--s-3); }
 .bar-row > .kbd, .bar-row > .bar-status { height: 28px; }
 .bar-input {
   flex: 1;
@@ -234,6 +237,7 @@
   caret-color: var(--accent);
   padding: 0;
   margin: 5px 0; /* centers the 18px first line on the 28px chip */
+  text-indent: calc(var(--chip-w, 0px) + var(--s-4));
   resize: none;
   overflow: hidden;
   max-height: calc(6 * 1.2em);
