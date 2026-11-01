@@ -214,11 +214,14 @@
 .bar { width: var(--bar-w); }
 .bar-row {
   display: flex;
-  align-items: center;
+  /* Top-aligned so the chip and hints stay on the first line when the text wraps. */
+  align-items: flex-start;
   gap: var(--s-4);
-  height: var(--bar-h);
-  padding: 0 var(--s-5) 0 var(--s-3) ;
+  min-height: var(--bar-h);
+  box-sizing: border-box;
+  padding: 9px var(--s-5) 9px var(--s-3);
 }
+.bar-row > .kbd, .bar-row > .bar-status { height: 28px; }
 .bar-input {
   flex: 1;
   min-width: 0;
@@ -230,10 +233,13 @@
   color: var(--ink);
   caret-color: var(--accent);
   padding: 0;
-  white-space: nowrap;
+  margin: 5px 0; /* centers the 18px first line on the 28px chip */
+  resize: none;
   overflow: hidden;
-  text-overflow: ellipsis;
+  max-height: calc(6 * 1.2em);
+  transition: height var(--t-glide) var(--ease-out);
 }
+.bar-input:placeholder-shown { white-space: nowrap; text-overflow: ellipsis; }
 .bar-input::placeholder { color: var(--ink-3); }
 .bar .sg-input-focus:focus-visible { outline: 0; }
 
@@ -480,4 +486,5 @@
 @media (prefers-reduced-motion: reduce) {
   .sg *, .sg *::before, .sg *::after { animation-duration: 1ms !important; animation-iteration-count: 1 !important; }
   .pip { transition: opacity var(--t-base) linear; }
+  .bar-input { transition: none; }
 }

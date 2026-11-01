@@ -10,7 +10,23 @@ let savedIdx = -1;
 let toastTimer = 0;
 
 const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
-const input = $<HTMLInputElement>("input");
+const input = $<HTMLTextAreaElement>("input");
+
+// Grow the field to fit wrapped text. The height transition animates it, and the root
+// ResizeObserver resizes the window each frame.
+function fitInput() {
+  if (input.value.includes("\n")) input.value = input.value.replace(/\n/g, " "); // one command, like the old <input>
+  const from = input.offsetHeight;
+  input.style.transition = "none";
+  input.style.height = "0";
+  const to = input.scrollHeight;
+  input.style.height = `${from}px`;
+  void input.offsetHeight; // commit the start height so the transition runs
+  input.style.transition = "";
+  input.style.height = `${to}px`;
+  input.style.overflowY = to > input.clientHeight ? "auto" : "hidden"; // past the 6-line cap
+}
+input.addEventListener("input", fitInput);
 const SVG = "http://www.w3.org/2000/svg";
 
 function el(tag: string, cls = "", text = ""): HTMLElement {
@@ -78,6 +94,7 @@ function reset() {
   $("target-app").textContent = target?.app ?? "No window";
   $("target-doc").textContent = target?.doc ?? "";
   input.value = "";
+  fitInput();
   input.disabled = !target;
   input.placeholder = !target ? "Click an app window, then press Ctrl+Alt+Space"
     : target.accessible ? `Ask Surgeon to do something in ${target.app}`
