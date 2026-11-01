@@ -71,6 +71,69 @@
         ],
         "createdAt": "2026-11-01T14:00:21.280Z",
         "reason": "agent decision: command bar uses ui/surgeon.css .bar-row (46px, align-items center, no vertical padding) as in the approved specimen; screenshots show ~9px vertical inset"
+      },
+      {
+        "rule": "clipped-overflow-container",
+        "value": "*",
+        "files": [
+          "video/launch.html"
+        ],
+        "createdAt": "2026-11-01T15:53:34.040Z",
+        "reason": "agent: mock app windows in the launch video clip their content on purpose, like real windows"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "sans",
+        "files": [
+          "video/launch.html"
+        ],
+        "createdAt": "2026-11-01T15:53:34.052Z",
+        "reason": "agent: Ubuntu Sans styles the mock GNOME app windows, not Surgeon UI"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "georgia",
+        "files": [
+          "video/launch.html"
+        ],
+        "createdAt": "2026-11-01T15:53:34.066Z",
+        "reason": "agent: serif fallback for the mock Writer document page"
+      },
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          "video/launch.html"
+        ],
+        "createdAt": "2026-11-01T15:54:13.962Z",
+        "reason": "agent: flagged elements are mock GNOME headerbars (height-centered) and the shipped .hud/.target components"
+      },
+      {
+        "rule": "tight-leading",
+        "value": "*",
+        "files": [
+          "video/launch.html"
+        ],
+        "createdAt": "2026-11-01T15:54:13.978Z",
+        "reason": "agent: single-line display headings and keycaps in a video frame, never wrapped body text"
+      },
+      {
+        "rule": "radial-halo",
+        "value": "*",
+        "files": [
+          "video/launch.html"
+        ],
+        "createdAt": "2026-11-01T15:54:13.998Z",
+        "reason": "agent: the gradient is the mock GNOME desktop wallpaper behind app windows"
+      },
+      {
+        "rule": "repeated-container-text",
+        "value": "*",
+        "files": [
+          "video/launch.html"
+        ],
+        "createdAt": "2026-11-01T16:31:04.699Z",
+        "reason": "agent: the mock Obsidian window shows the open note name in its title bar, sidebar and heading, as the real app does"
       }
     ]
   }
