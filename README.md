@@ -24,7 +24,7 @@ scripts/demo-apps.sh         # Image Viewer, Writer with a demo document, GNOME 
 systemctl --user stop surgeon-dev
 ```
 
-Click an app, press Ctrl+Alt+Space, type a request and press Enter. When the plan appears, Enter runs it. "Save as shortcut" binds the next free Ctrl+Alt+1 to 9.
+Click an app, press Ctrl+Alt+Space, type a request and press Enter. Under the field, the bar lists what Surgeon can use in that app: its GTK actions, the named controls it can see, other D-Bus APIs and the command line it may run. These are the same routes Codex gets. When the plan appears, Enter runs it. "Save as shortcut" binds the next free Ctrl+Alt+1 to 9.
 
 Always launch Surgeon and the demo apps through these scripts, never from a T3 Code terminal. T3 Code sets `ELECTRON_RUN_AS_NODE`, `NO_AT_BRIDGE` and `GTK_MODULES`, and its AppArmor label blocks AT-SPI calls to snap apps. `systemd-run --user` starts from the user manager's environment instead. The dev script also passes `--no-sandbox`, because Ubuntu 24.04 refuses Chromium's SUID sandbox unless `chrome-sandbox` is owned by root.
 

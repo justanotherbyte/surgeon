@@ -102,6 +102,7 @@ function reset() {
   $("status").hidden = true;
   $("enter-hint").hidden = false;
   renderSaved();
+  renderTools();
   show("bar");
   if (target?.needs_relaunch && !relaunchDismissed.has(target.ident.wm_class)) return relaunchNotice();
   input.focus();
@@ -133,6 +134,28 @@ function renderSaved() {
     row.addEventListener("click", () => { savedIdx = i; openSaved(); });
     list.append(row);
   });
+}
+
+// What Surgeon can drive in this app, so people know what to ask for. Filled in after the panel opens.
+function renderTools() {
+  const t = target?.tools;
+  const rows = !t ? [] : [
+    { route: "action", n: t.actions.length, noun: "action", names: t.actions },
+    { route: "control", n: t.controls.length, noun: "control", names: t.controls },
+    { route: "action", n: t.dbus.length, noun: "D-Bus API", names: t.dbus },
+    { route: "command", n: t.commands.length, noun: "command", names: t.commands },
+  ].filter((r) => r.n);
+  $("tools").hidden = rows.length === 0;
+  $("tools-head").textContent = `Surgeon can use in ${target?.app ?? ""}`;
+  $("tools-list").replaceChildren(...rows.map((r) => {
+    const li = el("li", "row");
+    const chip = el("span", "route", `${r.n} ${r.noun}${r.n === 1 ? "" : "s"}`);
+    chip.dataset.route = r.route;
+    const names = r.names.join(", ");
+    li.append(chip, el("span", "label", names));
+    li.title = names;
+    return li;
+  }));
 }
 
 // ---------- sub-apps ----------
@@ -459,6 +482,11 @@ async function save() {
 // ---------- wiring ----------
 
 ipcRenderer.on("target", (_e, t) => { target = t; reset(); });
+ipcRenderer.on("tools", (_e, { xid, tools }) => {
+  if (target?.ident?.xid !== xid) return; // the panel moved on to another window
+  target.tools = tools;
+  renderTools();
+});
 ipcRenderer.on("status", (_e, s) => { $("status-text").textContent = s.text; });
 ipcRenderer.on("notice", (_e, n) => { target = null; reset(); notice(n.tone, n.title, n.text); });
 ipcRenderer.on("subpanel", (_e, ev) => renderSubpanel(ev));
